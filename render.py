@@ -109,6 +109,24 @@ MODEL_RANK = {
     "light": ("#6d28d9", "#8b5cf6"),  # violet-700 → 500
 }
 
+# 终端卡的模型条按名次逐行取色，不再是单色相的明暗渐变 ——「薰衣草与玫瑰」：
+# 薰衣草 → 品红 → 玫红 → 淡品红 → 淡紫 → 玫瑰 → 银 → 灰蓝。
+#
+# 前半段留在头像那条紫色阶里，中段转暖到品红/玫瑰拉开单调，末两名淡出成中性银灰。
+# 关键是让「淡出」由彩度承担而不是继续堆紫：八行全是同一个色相的明暗变化，读起来
+# 就是一片紫，这是原先那版的问题。
+#
+# 亮色那一列不是暗色的复制。实测只有 Tailwind 的 500/600 两档在黑白两种底色上都
+# 安全：300/400 在白底跌破 3:1（#cbd5e1 只剩 1.5:1，等于白底上的白），700 在近黑
+# 底也跌破。所以两个主题各配一档，名次顺序和冷暖走向保持一致。
+# #7c8ba1 是 slate-400 与 500 之间的自定值，白底 3.5:1 —— 整套里最低的一处。
+TERMINAL_MODEL_COLORS = {
+    "dark": ("#a78bfa", "#c084fc", "#e879f9", "#f0abfc",
+             "#c4b5fd", "#fda4af", "#cbd5e1", "#94a3b8"),
+    "light": ("#7c3aed", "#9333ea", "#c026d3", "#d946ef",
+              "#8b5cf6", "#e11d48", "#64748b", "#7c8ba1"),
+}
+
 
 def ramp_for(name: str, theme: Theme) -> tuple[str, ...]:
     """按色相名生成五级梯度。改成算出来而不是手写死值，加新色相只要往 HUES 里
@@ -616,7 +634,8 @@ def card_terminal(summary: dict[str, Any], theme: Theme, title: str) -> str:
         ])
     lines.append([])
     lines.append([(2, "# top models", theme.faint)])
-    model_bars = rank_colors(theme, max(len(models), 1))
+    # 终端卡按名次取手挑的那组色；折叠区的模型卡仍用 rank_colors 的单色相渐变
+    model_bars = TERMINAL_MODEL_COLORS[theme.name]
     for index, (name, value) in enumerate(models):
         bars[len(lines)] = (value / model_grand, model_bars[index])
         lines.append([
