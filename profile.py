@@ -5,17 +5,20 @@ from __future__ import annotations
 
 import argparse
 import glob
+import hashlib
 import html
 import json
-import math
 import os
+import re
 import sqlite3
 from collections import Counter
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 from zoneinfo import ZoneInfo
+
+import render
 
 
 SCHEMA = """
@@ -51,11 +54,14 @@ class Config:
     subtitle: str
     timezone_name: str
     window_days: int
+    repo: str
+    branch: str
     claude_glob: str
     codex_homes: tuple[str, ...]
     cache_db: Path
     daily_ledger: Path
     output_dir: Path
+    readme: Path
 
 
 def load_config(path: Path) -> Config:
@@ -72,11 +78,14 @@ def load_config(path: Path) -> Config:
         subtitle=str(profile.get("subtitle", "Claude Code + Codex")),
         timezone_name=str(profile.get("timezone", "UTC")),
         window_days=int(profile.get("window_days", 365)),
+        repo=str(profile.get("repo", "")),
+        branch=str(profile.get("branch", "main")),
         claude_glob=str(paths.get("claude_glob", "")),
         codex_homes=tuple(str(item) for item in paths.get("codex_homes", [])),
         cache_db=Path(paths.get("cache_db", "data/profile.sqlite")),
         daily_ledger=Path(paths.get("daily_ledger", "data/daily.jsonl")),
         output_dir=Path(paths.get("output_dir", "dist")),
+        readme=Path(paths.get("readme", "README.md")),
     )
 
 
@@ -288,8 +297,16 @@ def aggregate(events: list[dict[str, Any]]) -> tuple[dict[str, dict[str, Any]], 
     provider_counts: Counter[str] = Counter()
     source_counts: Counter[str] = Counter()
     sessions: set[str] = set()
+    hours = [0] * 24
+    weekdays = [0] * 7
     for event in events:
         day = event["timestamp"][:10]
+        # 小时/星期分布只统计轮数，不含任何内容，可安全公开
+        try:
+            hours[int(event["timestamp"][11:13])] += event["turns"]
+            weekdays[date.fromisoformat(day).weekday()] += event["turns"]
+        except (ValueError, IndexError):
+            pass
         row = daily.setdefault(day, {
             "date": day, "sources": {}, "models": {}, "sessions": set(), "turns": 0,
             "input_tokens": 0, "output_tokens": 0, "cache_read_tokens": 0,
@@ -322,6 +339,7 @@ def aggregate(events: list[dict[str, Any]]) -> tuple[dict[str, dict[str, Any]], 
         "top_models": model_counts.most_common(8), "top_providers": provider_counts.most_common(8),
         "sources": dict(source_counts), "first_date": next(iter(ordered), None),
         "last_date": next(reversed(ordered), None),
+        "hours": hours, "weekdays": weekdays,
     }
     return ordered, summary
 
@@ -333,66 +351,109 @@ def write_ledger(config: Config, daily: dict[str, dict[str, Any]]) -> None:
             handle.write(json.dumps(daily[day], ensure_ascii=False, sort_keys=True) + "\n")
 
 
-def intensity_levels(values: list[int]) -> dict[int, int]:
-    positive = sorted(value for value in values if value > 0)
-    if not positive:
-        return {}
-    thresholds = [positive[max(0, math.ceil(len(positive) * fraction) - 1)] for fraction in (0.25, 0.5, 0.75)]
-    return {value: min(4, 1 + sum(value > threshold for threshold in thresholds)) for value in set(values) if value > 0}
+
+# ---------------------------------------------------------------- 输出
+
+GALLERY_BEGIN = "<!-- profile:gallery:begin -->"
+GALLERY_END = "<!-- profile:gallery:end -->"
+
+# README 图集布局：每行一个卡片名列表，同行的卡片会并排显示
+GALLERY_ROWS: tuple[tuple[str, ...], ...] = (
+    ("hero",),
+    ("heatmap",),
+    ("stats", "models"),
+    ("clock", "weekdays"),
+    ("trend",),
+    ("terminal",),
+)
+
+CARD_ALT = {
+    "hero": "AI coding profile summary",
+    "heatmap": "Daily activity heatmap",
+    "stats": "Token split by tool",
+    "models": "Top models by usage",
+    "clock": "Hourly coding rhythm",
+    "weekdays": "Weekday distribution",
+    "trend": "Recent 90-day trend",
+    "terminal": "Terminal-style summary",
+}
 
 
-def heatmap_svg(daily: dict[str, dict[str, Any]], end_date: date, window_days: int) -> str:
-    start = end_date - timedelta(days=window_days - 1)
-    start -= timedelta(days=(start.weekday() + 1) % 7)
-    days = (end_date - start).days + 1
-    values = [daily.get((start + timedelta(days=i)).isoformat(), {}).get("total_tokens", 0) for i in range(days)]
-    levels = intensity_levels(values)
-    colors = ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"]
-    cell, gap = 11, 3
-    columns = math.ceil(days / 7)
-    width = columns * (cell + gap) + 42
-    height = 7 * (cell + gap) + 24
-    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Coding activity heatmap" width="{width}" height="{height}">']
-    parts.append('<style>text{font-family:Inter,Arial,sans-serif;font-size:10px;fill:#8b949e}.cell{stroke:#0d1117;stroke-width:1}</style>')
-    for index, value in enumerate(values):
-        current = start + timedelta(days=index)
-        column, row = index // 7, (current.weekday() + 1) % 7
-        title = f"{current.isoformat()}: {value:,} tokens"
-        parts.append(f'<rect class="cell" x="{36 + column * (cell + gap)}" y="{row * (cell + gap) + 10}" width="{cell}" height="{cell}" rx="2" fill="{colors[levels.get(value, 0)]}"><title>{html.escape(title)}</title></rect>')
-    parts.append('<text x="0" y="20">Mon</text><text x="0" y="44">Wed</text><text x="0" y="68">Fri</text>')
-    return "".join(parts) + "</svg>"
+def asset_url(config: Config, name: str, digest: str) -> str:
+    """卡片地址。配了 repo 就用 raw 绝对地址，否则退回仓库内相对路径。
+
+    带上内容摘要做 cache-bust，让 GitHub 的 camo 代理在图变了之后立刻取新图。
+    """
+    if config.repo:
+        base = f"https://raw.githubusercontent.com/{config.repo}/{config.branch}"
+        return f"{base}/{config.output_dir.as_posix()}/{name}.svg?v={digest}"
+    return f"./{config.output_dir.as_posix()}/{name}.svg"
 
 
-def compact(value: int) -> str:
-    for unit, divisor in (("b", 1_000_000_000), ("m", 1_000_000), ("k", 1_000)):
-        if value >= divisor:
-            return f"{value / divisor:.1f}{unit}"
-    return str(value)
+def gallery_markdown(config: Config, digests: dict[str, str]) -> str:
+    """生成 README 中的图集区块。
+
+    每行独立包在 <p align="center"> 里：GitHub 的 Markdown 会把它当成一个完整
+    HTML 块，比依赖外层 <div> 更稳（块内空行会中断 HTML 解析）。<picture> 负责
+    按读者的亮/暗主题各取一张图。
+    """
+    blocks: list[str] = []
+    for row in GALLERY_ROWS:
+        pictures = []
+        for card in row:
+            dark = asset_url(config, f"{card}-dark", digests.get(f"{card}-dark", ""))
+            light = asset_url(config, f"{card}-light", digests.get(f"{card}-light", ""))
+            width = render.CARD_SIZES.get(card, (880, 0))[0]
+            pictures.append(
+                "  <picture>\n"
+                f'    <source media="(prefers-color-scheme: dark)" srcset="{dark}">\n'
+                f'    <source media="(prefers-color-scheme: light)" srcset="{light}">\n'
+                f'    <img alt="{html.escape(CARD_ALT.get(card, card))}" src="{light}" width="{width}">\n'
+                "  </picture>"
+            )
+        blocks.append('<p align="center">\n' + "\n".join(pictures) + "\n</p>")
+    return "\n\n".join(blocks)
 
 
-def card_svg(config: Config, summary: dict[str, Any], heatmap: str) -> str:
-    top_models = " · ".join(f"{html.escape(name)} ({compact(value)})" for name, value in summary["top_models"][:4]) or "No model data"
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="300" viewBox="0 0 1000 300" role="img" aria-label="{html.escape(config.title)}">
-<defs><linearGradient id="bg" x1="0" x2="1"><stop stop-color="#0d1117"/><stop offset="1" stop-color="#161b22"/></linearGradient></defs>
-<rect width="1000" height="300" rx="18" fill="url(#bg)"/><text x="32" y="42" fill="#f0f6fc" font-size="24" font-family="Inter,Arial,sans-serif" font-weight="700">{html.escape(config.title)}</text>
-<text x="32" y="68" fill="#8b949e" font-size="14" font-family="Inter,Arial,sans-serif">{html.escape(config.subtitle)} · {summary.get('first_date') or '—'} to {summary.get('last_date') or '—'}</text>
-<text x="32" y="112" fill="#f0f6fc" font-size="28" font-family="Inter,Arial,sans-serif" font-weight="700">{compact(summary['total_tokens'])}</text><text x="32" y="134" fill="#8b949e" font-size="12" font-family="Inter,Arial,sans-serif">reported token units</text>
-<text x="180" y="112" fill="#f0f6fc" font-size="28" font-family="Inter,Arial,sans-serif" font-weight="700">{summary['active_days']}</text><text x="180" y="134" fill="#8b949e" font-size="12" font-family="Inter,Arial,sans-serif">active days</text>
-<text x="280" y="112" fill="#f0f6fc" font-size="28" font-family="Inter,Arial,sans-serif" font-weight="700">{summary['sessions']}</text><text x="280" y="134" fill="#8b949e" font-size="12" font-family="Inter,Arial,sans-serif">sessions</text>
-<text x="32" y="164" fill="#8b949e" font-size="12" font-family="Inter,Arial,sans-serif">Top models</text><text x="32" y="184" fill="#c9d1d9" font-size="12" font-family="Inter,Arial,sans-serif">{top_models}</text>
-<g transform="translate(32,205)">{heatmap}</g></svg>'''
+def update_readme(config: Config, gallery: str) -> bool:
+    """只替换 README 里标记包裹的图集区块，手写文案原样保留。"""
+    if not config.readme.exists():
+        return False
+    text = config.readme.read_text(encoding="utf-8")
+    pattern = re.compile(
+        re.escape(GALLERY_BEGIN) + r".*?" + re.escape(GALLERY_END), re.DOTALL
+    )
+    if not pattern.search(text):
+        return False
+    replacement = f"{GALLERY_BEGIN}\n{gallery}\n{GALLERY_END}"
+    updated = pattern.sub(lambda _: replacement, text, count=1)
+    if updated == text:
+        return False
+    config.readme.write_text(updated, encoding="utf-8")
+    return True
 
 
 def write_outputs(config: Config, daily: dict[str, dict[str, Any]], summary: dict[str, Any]) -> None:
     config.output_dir.mkdir(parents=True, exist_ok=True)
-    end_date = date.fromisoformat(summary["last_date"]) if summary["last_date"] else date.today()
-    heatmap = heatmap_svg(daily, end_date, config.window_days)
-    (config.output_dir / "profile.svg").write_text(card_svg(config, summary, heatmap), encoding="utf-8")
+    cards = render.build_cards(
+        daily, summary, config.title, config.subtitle, config.window_days
+    )
+    digests: dict[str, str] = {}
+    for name, markup in cards.items():
+        (config.output_dir / f"{name}.svg").write_text(markup, encoding="utf-8")
+        digests[name] = hashlib.sha256(markup.encode("utf-8")).hexdigest()[:8]
+
+    # 兼容旧引用：profile.svg 始终等于暗色主视觉卡
+    (config.output_dir / "profile.svg").write_text(cards["hero-dark"], encoding="utf-8")
+
     payload = {"daily": daily, "summary": summary}
-    (config.output_dir / "profile.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    rows = "".join(f"<tr><td>{html.escape(str(name))}</td><td>{value:,}</td></tr>" for name, value in summary["top_models"])
-    page = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>{html.escape(config.title)}</title><style>body{{background:#0d1117;color:#f0f6fc;font-family:Inter,Arial,sans-serif;margin:40px;max-width:1100px}}.muted{{color:#8b949e}}.stats{{display:flex;gap:28px;flex-wrap:wrap}}.stat{{font-size:28px;font-weight:700}}.stat small{{display:block;color:#8b949e;font-size:12px;font-weight:400}}.panel{{border:1px solid #30363d;border-radius:14px;padding:24px;margin-top:24px;overflow:auto}}table{{border-collapse:collapse;width:100%}}td,th{{padding:8px;border-bottom:1px solid #21262d;text-align:left}}</style></head><body><h1>{html.escape(config.title)}</h1><p class="muted">{html.escape(config.subtitle)}</p><div class="stats"><div class="stat">{summary['total_tokens']:,}<small>reported token units</small></div><div class="stat">{summary['active_days']}<small>active days</small></div><div class="stat">{summary['sessions']}<small>sessions</small></div><div class="stat">{summary['turns']}<small>usage events</small></div></div><div class="panel">{heatmap}</div><div class="panel"><h2>Top models</h2><table><tr><th>Model</th><th>Tokens</th></tr>{rows}</table></div></body></html>'''
-    (config.output_dir / "profile.html").write_text(page, encoding="utf-8")
+    (config.output_dir / "profile.json").write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    (config.output_dir / "profile.html").write_text(
+        render.report_html(config.title, config.subtitle, cards, summary), encoding="utf-8"
+    )
+    update_readme(config, gallery_markdown(config, digests))
 
 
 def run_update(config: Config) -> None:

@@ -1,15 +1,20 @@
 [profile]
-title = "AI Coding Contribution Profile"
-subtitle = "Claude Code + Codex"
+# 主视觉卡片上的大标题，通常写你的名字
+title = "Your Name"
+subtitle = "Long-term Claude Code + Codex activity, collected locally"
 timezone = "Asia/Shanghai"
 window_days = 365
+# 用于生成 README 里的 raw 图片地址；留空则退回仓库内相对路径
+repo = "your-name/your-name"
+branch = "main"
 
 [paths]
-claude_glob = "/datb/home/zhangfang/.claude/projects/**/*.jsonl"
+claude_glob = "~/.claude/projects/**/*.jsonl"
 codex_homes = [
-  "/datb/home/zhangfang/.codex",
-  "/datb/home/zhangfang/.local/state/agent-config/codex/*",
+  "~/.codex",
+  "~/.local/state/agent-config/codex/*",
 ]
 cache_db = "data/profile.sqlite"
 daily_ledger = "data/daily.jsonl"
 output_dir = "dist"
+readme = "README.md"
