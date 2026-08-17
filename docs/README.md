@@ -41,8 +41,9 @@ title = "Your Name"          # used in the terminal card title bar
 subtitle = "…"               # shown in the local HTML report
 timezone = "Asia/Shanghai"   # buckets events into local days and hours
 window_days = 365            # heatmap window
-repo = "you/you"             # builds raw.githubusercontent URLs for the README
+repo = "you/you"             # builds the README image URLs
 branch = "main"
+asset_cdn = "jsdelivr"       # "jsdelivr" (proxied by camo, 8-day cache) or "raw" (direct, 5-min cache)
 
 [paths]
 claude_glob  = "~/.claude/projects/**/*.jsonl"
@@ -133,7 +134,35 @@ python3 profile.py update --config config.toml
 git add data/daily.jsonl dist README.md
 git commit -m "chore: update coding activity profile"
 git push
+# with asset_cdn = "jsdelivr", also purge the CDN — see below
+curl -X POST https://purge.jsdelivr.net/ -H 'Content-Type: application/json' \
+     -d '{"path":["/gh/you/you@main/dist/terminal-dark.svg", "…"]}'
 ```
+
+### Why the cards are served through jsDelivr
+
+GitHub only proxies images hosted on third-party domains. `raw.githubusercontent.com` is one of
+its own, so a README pointing there is left untouched and the reader's browser connects to raw
+directly — with `cache-control: max-age=300`. Five minutes later the cache is cold and every
+visit has to reach that host again. On a network where githubusercontent is unreliable, the
+cards then show up as alt text on exactly those reloads that land after the cache expires.
+
+Pointing at `cdn.jsdelivr.net` instead makes the URL third-party, so GitHub rewrites it to
+`camo.githubusercontent.com`, which serves `cache-control: max-age=691200` — eight days. The
+image still travels the same kind of network, but the browser has to fetch it roughly three
+orders of magnitude less often, so there are far fewer chances to fail.
+
+The cost is staleness. jsDelivr caches a `@branch` path at the edge for 12 hours **and ignores
+the query string**, so the `?v=<digest>` cache-buster that works on camo does nothing here — after
+a push, `cdn.jsdelivr.net/…@main/dist/terminal-dark.svg?v=<new>` still returns the previous file.
+`scripts/publish_profile.sh` therefore calls the purge API for every jsDelivr path it finds in
+the README right after pushing. Purging the same path twice in quick succession can come back
+`"throttled": true`, in which case that one file keeps serving the old copy until the 12 hours
+elapse; re-running the purge for it a little later clears it.
+
+Set `asset_cdn = "raw"` to go back to direct raw URLs — images are then always current, at the
+cost of the 5-minute cache and the reliability that comes with it. The publish script's purge
+step finds no jsDelivr URLs in the README and skips itself.
 
 ## Retention and backfill
 
