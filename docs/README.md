@@ -111,9 +111,9 @@ of the repository and lands on a 404. Inside `docs/` relative links are fine.
   `Less □□□□□ More` legend all mirror GitHub's contribution box, so the cards sit on a profile
   without looking imported. The ramps deliberately do **not** use GitHub's green: these grids
   count tokens and prompts, and borrowing the commit colors would invite reading them as commits.
-  Ramps live in the `RAMPS` table keyed by hue, not on the `Theme`: violet is the
+  Ramps live in the `RAMPS` table keyed by hue, not on the `Theme`: mauve is the
   primary metric (the combined prompt calendar and the all-tools heatmap), and each tool
-  gets its own hue from `TOOL_RAMPS` (claude-code cyan, codex pink) shared by its heatmap,
+  gets its own hue from `TOOL_RAMPS` (claude-code teal, codex pink) shared by its heatmap,
   and the bars in the terminal card - one hue per thing being measured.
 
 ## Long-term publishing

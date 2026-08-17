@@ -68,25 +68,27 @@ LIGHT = Theme(
 
 THEMES = (DARK, LIGHT)
 
-# 网格梯度按用途取用，不绑在主题上：一个色相代表一个含义。紫色是主日历，青色和
-# 粉色分给两个工具，让分工具视图一眼可辨。绿色留给 GitHub 真正的贡献图。
+# 网格梯度按用途取用，不绑在主题上：一个色相代表一个含义。mauve 是主日历，teal
+# 和 pink 分给两个工具，让分工具视图一眼可辨。绿色留给 GitHub 真正的贡献图。
+# 暗色/亮色分别取 Catppuccin Mocha / Latte 的对应色相，从 GitHub 网格底色向
+# 纯色相插值，保证和贡献图一样的「低强度很淡、高强度饱和」的节奏。
 RAMPS: dict[str, dict[str, tuple[str, str, str, str, str]]] = {
-    "violet": {
-        "dark": ("#161b22", "#30215f", "#4d2fa0", "#7449d6", "#a78bfa"),
-        "light": ("#ebedf0", "#ddd0fb", "#b794f4", "#8250df", "#553098"),
+    "mauve": {
+        "dark": ("#161b22", "#554c6d", "#7a6797", "#9e83c2", "#cba6f7"),
+        "light": ("#ebedf0", "#c8aef0", "#b58aef", "#a166ef", "#8839ef"),
     },
-    "cyan": {
-        "dark": ("#161b22", "#0c3b45", "#0f6577", "#1a9db5", "#56d4dd"),
-        "light": ("#ebedf0", "#c8eaf2", "#7fd0e0", "#2497b4", "#0b6b80"),
+    "teal": {
+        "dark": ("#161b22", "#426161", "#5b8884", "#74b0a8", "#94e2d5"),
+        "light": ("#ebedf0", "#a1cdd2", "#76bbc0", "#4ca9af", "#179299"),
     },
     "pink": {
-        "dark": ("#161b22", "#4d1533", "#8a1f57", "#c93a84", "#f778ba"),
-        "light": ("#ebedf0", "#fbd3e7", "#f19cc8", "#d4459a", "#8c1d5e"),
+        "dark": ("#161b22", "#645567", "#91778e", "#bd98b6", "#f5c2e7"),
+        "light": ("#ebedf0", "#ebc3e3", "#eaacdc", "#ea94d4", "#ea76cb"),
     },
 }
 
-PRIMARY_RAMP = "violet"
-TOOL_RAMPS = ("cyan", "pink", "violet")  # 按工具名排序循环取用
+PRIMARY_RAMP = "mauve"
+TOOL_RAMPS = ("teal", "pink", "mauve")  # 按工具名排序循环取用
 
 
 def ramp_for(name: str, theme: Theme) -> tuple[str, str, str, str, str]:
