@@ -41,12 +41,11 @@ class Theme:
     fg: str  # 主文字
     muted: str  # 次要文字
     faint: str  # 刻度、脚注
-    accents: tuple[str, ...]  # 分类色，取自 Catppuccin：暗色用 Mocha、亮色用 Latte
+    accents: tuple[str, ...]  # 终端卡的提示符与日期，取自 Tailwind Violet / Purple
 
 
 # 方格的几何、月份刻度、Less/More 图例都照搬 GitHub，但色相刻意避开贡献图的绿：
-# 这里量的是 token 和提示数，不是 commit，撞色只会让人误读。两张网格各用一个色
-# 相，读者扫一眼就知道它们不是同一个指标。
+# 这里量的是 token 和提示数，不是 commit，撞色只会让人误读。
 DARK = Theme(
     name="dark",
     canvas="#0d1117",
@@ -55,7 +54,8 @@ DARK = Theme(
     fg="#f0f6fc",
     muted="#9198a1",
     faint="#6e7681",
-    accents=("#cba6f7", "#89b4fa", "#94e2d5", "#f5c2e7", "#fab387", "#a6e3a1"),
+    # 终端卡的提示符和日期。也收进紫色系，否则一屏紫里冒出一句蓝色的日期很跳
+    accents=("#a78bfa", "#c4b5fd"),  # violet-400 / 300
 )
 
 LIGHT = Theme(
@@ -66,21 +66,25 @@ LIGHT = Theme(
     fg="#1f2328",
     muted="#59636e",
     faint="#818b98",
-    accents=("#8839ef", "#1e66f5", "#179299", "#ea76cb", "#fe640b", "#40a02b"),
+    accents=("#7c3aed", "#9333ea"),  # violet-600 / purple-600
 )
 
 THEMES = (DARK, LIGHT)
 
-# 网格梯度按用途取用，不绑在主题上：一个色相代表一个含义。mauve 是主日历，其余
-# 按工具名排序依次分给各个工具，让分工具视图一眼可辨。绿色留给 GitHub 真正的
-# 贡献图，不参与分配。色相取 Catppuccin：暗色用 Mocha、亮色用 Latte。
-HUES: dict[str, tuple[str, str]] = {  # 名称 -> (Mocha, Latte)
-    "mauve": ("#cba6f7", "#8839ef"),
-    "teal": ("#94e2d5", "#179299"),
-    "pink": ("#f5c2e7", "#ea76cb"),
-    "blue": ("#89b4fa", "#1e66f5"),
-    "peach": ("#fab387", "#fe640b"),
-    "yellow": ("#f9e2af", "#df8e1d"),
+# 整套分类色收进 Tailwind 的 Violet / Purple 色阶，不再一个工具一个色相。工具之间
+# 靠明度拉开（claude-code 深、codex 浅），而不是靠冷暖对立，这样同一页上不会出现
+# 青配粉这种互不相干的组合。绿色仍然留给 GitHub 真正的贡献图，不参与分配。
+#
+# 亮色主题不能直接用暗色那一档：#c084fc 铺在白底上对比度只有 2.6:1，达不到图形
+# 元素 3:1 的下限，条会糊掉。所以每个色相在亮色侧统一往深处挪一到两级，明暗关系
+# （谁深谁浅）保持不变。
+HUES: dict[str, tuple[str, str]] = {  # 名称 -> (暗色主题, 亮色主题)
+    "violet": ("#8b5cf6", "#7c3aed"),   # violet-500 / 600
+    "purple": ("#c084fc", "#a855f7"),   # purple-400 / 500
+    "indigo": ("#818cf8", "#6366f1"),   # indigo-400 / 500
+    "fuchsia": ("#e879f9", "#c026d3"),  # fuchsia-400 / 600
+    "plum": ("#a78bfa", "#8b5cf6"),     # violet-400 / 500
+    "orchid": ("#d8b4fe", "#9333ea"),   # purple-300 / 600
 }
 
 # 网格最低一级用 GitHub 贡献图的空格底色，往上向纯色相插值，节奏和贡献图一致：
@@ -88,10 +92,22 @@ HUES: dict[str, tuple[str, str]] = {  # 名称 -> (Mocha, Latte)
 GRID_BASE = {"dark": "#161b22", "light": "#ebedf0"}
 RAMP_STOPS = (0.35, 0.55, 0.75, 1.0)
 
-PRIMARY_RAMP = "mauve"
-# 分工具色相的取用顺序。主日历的 mauve 排在最后，这样工具少时不会和它撞色；
-# 工具多到用完一轮会从头循环，六个色相够用很久了。
-TOOL_RAMPS = ("teal", "pink", "blue", "peach", "yellow", "mauve")
+PRIMARY_RAMP = "violet"
+# 分工具色相按工具名排序依次取用：claude-code 在前拿 violet（深紫），codex 拿
+# purple（浅紫）。后面几个留给以后接入的 agent，都在同一片紫里，加进来不会突兀。
+TOOL_RAMPS = ("violet", "purple", "indigo", "fuchsia", "plum", "orchid")
+
+# 模型榜的排名梯度，沿 Tailwind Violet 色阶铺开。亮色主题按字面来：第一名最深，
+# 往下依次变浅。暗色主题必须反过来 —— 深紫压在 #0d1117 上几乎看不见，第一名反而
+# 成了最不显眼的一行。两边的实际效果一致：排名越靠前，和背景的对比越强。
+#
+# 两端不能取满色阶。图形元素的可读下限是 3:1，实测在 #0d1117 上只有 violet-200
+# 到 600 达标，在 #ffffff 上只有 500 到 900 达标；越界的话末几名的条会糊进背景。
+# 所以每个主题各取自己那段安全区的两头。
+MODEL_RANK = {
+    "dark": ("#c4b5fd", "#7c3aed"),   # violet-300 → 600
+    "light": ("#6d28d9", "#8b5cf6"),  # violet-700 → 500
+}
 
 
 def ramp_for(name: str, theme: Theme) -> tuple[str, ...]:
@@ -117,17 +133,15 @@ def lerp_hex(start: str, end: str, fraction: float) -> str:
 
 
 def rank_colors(theme: Theme, count: int) -> list[str]:
-    """排名条的渐变色：第 1 名用主色 mauve，末名过渡到 teal。
+    """排名条的渐变色，沿 Tailwind Violet 色阶铺开，第 1 名对比最强。
 
-    排名是有序数据，用同族渐变比每行换一个色相耐看得多，而且两端正好是
-    「紫 = 汇总口径、青 = 工具口径」的两个品牌色相。
+    排名是有序数据，用同一色相的明度渐变比每行换一个色相耐看得多，也不会让读者
+    误以为颜色编码了别的含义。两端见 MODEL_RANK。
     """
+    start, end = MODEL_RANK[theme.name]
     if count <= 1:
-        return [theme.accents[0]]
-    return [
-        lerp_hex(theme.accents[0], theme.accents[2], index / (count - 1))
-        for index in range(count)
-    ]
+        return [start]
+    return [lerp_hex(start, end, index / (count - 1)) for index in range(count)]
 
 # GitHub 贡献图的方格比例：10px 方块、3px 间距、2px 圆角。
 # 这里放大到 12px 以填满 880 宽的卡片，比例保持不变。
