@@ -59,7 +59,7 @@ class Config:
     claude_glob: str
     codex_homes: tuple[str, ...]
     claude_stats_cache: str
-    claude_history: str
+    prompt_histories: tuple[tuple[str, str], ...]
     cache_db: Path
     daily_ledger: Path
     output_dir: Path
@@ -85,7 +85,11 @@ def load_config(path: Path) -> Config:
         claude_glob=str(paths.get("claude_glob", "")),
         codex_homes=tuple(str(item) for item in paths.get("codex_homes", [])),
         claude_stats_cache=str(paths.get("claude_stats_cache", "")),
-        claude_history=str(paths.get("claude_history", "")),
+        prompt_histories=tuple(
+            (str(item.get("source", "unknown")), str(item.get("glob", "")))
+            for item in paths.get("prompt_histories", [])
+            if item.get("glob")
+        ),
         cache_db=Path(paths.get("cache_db", "data/profile.sqlite")),
         daily_ledger=Path(paths.get("daily_ledger", "data/daily.jsonl")),
         output_dir=Path(paths.get("output_dir", "dist")),
@@ -398,33 +402,41 @@ def read_stats_cache(config: Config) -> dict[str, Any]:
             "first_session": str(raw.get("firstSessionDate") or "")[:10]}
 
 
-def read_prompt_calendar(config: Config) -> dict[str, int]:
-    """从提示历史里数出每天提交了多少条提示。只读时间戳。"""
-    if not config.claude_history:
-        return {}
-    path = Path(os.path.expanduser(config.claude_history))
-    if not path.exists():
-        return {}
+def read_prompt_calendar(config: Config) -> dict[str, dict[str, int]]:
+    """从各工具的提示历史里数出每天提交了多少条提示，按工具分开返回。
+
+    只读时间戳。两种工具的字段名和类型都不一样：Claude 用 `timestamp`（毫秒整
+    数），Codex 用 `ts`（秒，且是字符串），所以两个键都试、字符串也接受。提示
+    原文和项目路径不进入任何输出。
+    """
     zone = ZoneInfo(config.timezone_name)
-    counts: Counter[str] = Counter()
-    try:
-        with path.open(encoding="utf-8", errors="ignore") as handle:
-            for line in handle:
-                try:
-                    stamp = json.loads(line).get("timestamp")
-                except json.JSONDecodeError:
-                    continue
-                if not isinstance(stamp, (int, float)):
-                    continue
-                seconds = stamp / 1000 if stamp > 1e11 else stamp
-                counts[datetime.fromtimestamp(seconds, zone).date().isoformat()] += 1
-    except OSError:
-        return {}
-    return dict(counts)
+    calendars: dict[str, Counter[str]] = {}
+    for source, pattern in config.prompt_histories:
+        for path in expand_paths([pattern]):
+            counts = calendars.setdefault(source, Counter())
+            try:
+                with path.open(encoding="utf-8", errors="ignore") as handle:
+                    for line in handle:
+                        try:
+                            row = json.loads(line)
+                        except json.JSONDecodeError:
+                            continue
+                        stamp = row.get("timestamp", row.get("ts"))
+                        try:
+                            seconds = float(stamp)
+                        except (TypeError, ValueError):
+                            continue
+                        if seconds > 1e11:  # 毫秒
+                            seconds /= 1000
+                        counts[datetime.fromtimestamp(seconds, zone).date().isoformat()] += 1
+            except OSError:
+                continue
+    return {source: dict(counts) for source, counts in calendars.items() if counts}
 
 
 def merge_backfill(daily: dict[str, dict[str, Any]], summary: dict[str, Any],
-                   stats: dict[str, Any], prompts: dict[str, int]) -> tuple[dict, dict]:
+                   stats: dict[str, Any],
+                   prompts: dict[str, dict[str, int]]) -> tuple[dict, dict]:
     """把回填数据并进日账本与汇总。
 
     transcript 永远优先：它有 input/output/cache 拆分，聚合缓存没有。回填只填
@@ -494,8 +506,18 @@ def merge_backfill(daily: dict[str, dict[str, Any]], summary: dict[str, Any],
     # Claude 的终身累计（stats-cache 的 modelUsage）没有日期维度，无法进热力图，
     # 只作为参考留在 profile.json 里；卡片一律用有日期的口径，保持前后一致。
     summary["claude_lifetime_tokens"] = stats.get("lifetime_tokens", 0)
-    summary["prompt_calendar"] = dict(sorted(prompts.items()))
-    summary["prompt_total"] = sum(prompts.values())
+    # 提示日历跨全部工具汇总，并保留分工具明细供折叠区使用
+    merged: Counter[str] = Counter()
+    for counts in prompts.values():
+        merged.update(counts)
+    summary["prompt_calendar"] = dict(sorted(merged.items()))
+    summary["prompt_calendar_by_source"] = {
+        source: dict(sorted(counts.items())) for source, counts in sorted(prompts.items())
+    }
+    summary["prompt_total"] = sum(merged.values())
+    summary["prompt_sources"] = {
+        source: sum(counts.values()) for source, counts in sorted(prompts.items())
+    }
     summary["prompt_first"] = next(iter(summary["prompt_calendar"]), None)
     return ordered, summary
 
@@ -603,17 +625,22 @@ def gallery_markdown(config: Config, digests: dict[str, str],
         if f"heatmap-{tool}-dark" not in digests:
             continue
         share = summary["sources"][tool] / (sum(summary["sources"].values()) or 1)
+        prompts = (summary.get("prompt_sources") or {}).get(tool)
+        detail = f"{render.compact(summary['sources'][tool])} tokens, {share * 100:.0f}% of total"
+        if prompts:
+            detail += f" &nbsp;·&nbsp; {prompts:,} prompts"
+        rows = [
+            picture(config, f"heatmap-{tool}", digests, f"{tool} activity heatmap",
+                    render.CARD_WIDTH),
+        ]
+        if f"calendar-{tool}-dark" in digests:
+            rows.append(picture(config, f"calendar-{tool}", digests,
+                                f"{tool} prompt calendar", render.CARD_WIDTH))
+        rows.append(picture(config, f"models-{tool}", digests, f"{tool} models", half))
+        body = "\n".join(f'<p align="center">{row}</p>' for row in rows)
         blocks.append(
             f"<details>\n<summary>&nbsp;<b>{html.escape(tool)}</b> only "
-            f"&nbsp;·&nbsp; {render.compact(summary['sources'][tool])} tokens, "
-            f"{share * 100:.0f}% of total</summary>\n<br>\n"
-            + '<p align="center">'
-            + picture(config, f"heatmap-{tool}", digests,
-                      f"{tool} activity heatmap", render.CARD_WIDTH)
-            + "</p>\n"
-            + '<p align="center">'
-            + picture(config, f"models-{tool}", digests, f"{tool} models", half)
-            + "</p>\n</details>"
+            f"&nbsp;·&nbsp; {detail}</summary>\n<br>\n{body}\n</details>"
         )
     return "\n\n".join(blocks)
 
@@ -669,7 +696,7 @@ def run_update(config: Config) -> None:
     retained = write_ledger(config, daily)
     write_outputs(config, daily, summary)
     report = {k: v for k, v in summary.items()
-              if k not in ("prompt_calendar", "models_by_source")}
+              if k not in ("prompt_calendar", "prompt_calendar_by_source", "models_by_source")}
     print(json.dumps(
         {"changed_files": changed, "ledger_only_days": retained, **report},
         ensure_ascii=False, indent=2,

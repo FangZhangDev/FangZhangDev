@@ -143,7 +143,7 @@ a month after it happened. Two files survive that cleanup and are read as a fall
 | `stats-cache.json` → `dailyModelTokens` | since the feature shipped | yes, per model, no split |
 | `stats-cache.json` → `dailyActivity` | since `firstSessionDate` | no, sessions and messages only |
 | `stats-cache.json` → `modelUsage` | all time | yes, but **undated** |
-| `history.jsonl` | longest of all | no, prompt timestamps only |
+| `history.jsonl` (one per tool) | longest of all | no, prompt timestamps only |
 
 Merge rules, in `merge_backfill`:
 
@@ -157,6 +157,13 @@ Merge rules, in `merge_backfill`:
   the cards always reconcile with the ledger.
 - `history.jsonl` supplies only per-day prompt counts for the calendar card. Prompt text and
   project paths are never read into memory beyond the line being parsed, and never written out.
+- Every tool keeps its **own** prompt history, and they must all be listed under
+  `prompt_histories` — Claude Code has one, Codex has one per home. Miss a file and the calendar
+  quietly undercounts with nothing on the card to reveal it. The two formats differ: Claude writes
+  `timestamp` in milliseconds as an integer, Codex writes `ts` in seconds as a string.
+- The calendar counts **prompts you sent, not model responses**, and prompt history carries no
+  model field — so the figure spans every model, and cannot be broken down by one. It can be
+  broken down by tool, which is what the per-tool `<details>` blocks show.
 
 ### Codex
 

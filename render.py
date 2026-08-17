@@ -295,14 +295,24 @@ def card_heatmap(daily: dict[str, dict[str, Any]], end_date: date, window_days: 
 # ---------------------------------------------------------------- 卡片：提示日历
 
 
-def card_calendar(summary: dict[str, Any], end_date: date, theme: Theme) -> str:
+def card_calendar(summary: dict[str, Any], end_date: date, theme: Theme,
+                  source: str | None = None) -> str:
     """提示日历。覆盖期比 token 热力图长：会话记录被清理后 token 不可考，
-    但提示时间戳留着，所以这张能一路回溯到最早的使用记录。"""
-    uid = f"k{theme.name}"
+    但提示时间戳留着，所以这张能一路回溯到最早的使用记录。
+
+    数的是「你敲了多少条提示」，和哪个模型作答无关 —— 提示历史里没有模型字段。
+    标题必须写清覆盖哪些工具，否则读者无从判断这个数是全量还是某一个工具的。
+    """
+    uid = f"k{theme.name}{(source or 'all').replace('-', '')}"
     width, height = CARD_WIDTH, 192
     top = 60
 
-    calendar = summary.get("prompt_calendar") or {}
+    if source:
+        calendar = (summary.get("prompt_calendar_by_source") or {}).get(source, {})
+        scope = source
+    else:
+        calendar = summary.get("prompt_calendar") or {}
+        scope = " + ".join(summary.get("prompt_sources") or {}) or "all tools"
     if not calendar:
         return ""
     start = date.fromisoformat(min(calendar))
@@ -314,12 +324,12 @@ def card_calendar(summary: dict[str, Any], end_date: date, theme: Theme) -> str:
     out = [open_svg(width, height, "Prompt calendar"), base_style(theme),
            frame(width, height, theme)]
     out.append(
-        f'<text class="h fu" x="16" y="30">{summary.get("prompt_total", 0):,} prompts '
+        f'<text class="h fu" x="16" y="30">{sum(calendar.values()):,} prompts '
         f'since {esc(min(calendar))}</text>'
     )
     out.append(
         f'<text class="sub fu" x="{width - 16}" y="30" text-anchor="end">'
-        f'{active} active days · reaches further back than token history</text>'
+        f'{esc(scope)} · {active} active days</text>'
     )
 
     grid, grid_left, grid_right = grid_block(values, start, end_date, uid, theme.ramp_alt, width, top)
@@ -328,7 +338,7 @@ def card_calendar(summary: dict[str, Any], end_date: date, theme: Theme) -> str:
     foot_y = top + 7 * PITCH + 22
     out.append(
         f'<text class="foot" x="{grid_left}" y="{foot_y}">'
-        f'Prompt timestamps only — no content is read</text>'
+        f'Prompts you sent, any model · timestamps only, no content read</text>'
     )
     out.append(legend(grid_right - 152, foot_y, theme.ramp_alt))
     return "".join(out) + "</svg>"
@@ -551,7 +561,7 @@ def report_html(title: str, subtitle: str, cards: dict[str, str],
                     f'<img src="{name}-{theme}.svg" alt="{esc(name)}"></figure>'
                 )
         for tool in tools:
-            for name in ("heatmap", "models"):
+            for name in ("heatmap", "calendar", "models"):
                 key = f"{name}-{tool}-{theme}"
                 if key in cards:
                     blocks.append(
@@ -668,4 +678,7 @@ def build_cards(daily: dict[str, dict[str, Any]], summary: dict[str, Any],
                 daily, end_date, window_days, summary, theme, source=tool
             )
             cards[f"models-{tool}-{theme.name}"] = card_models(summary, theme, source=tool)
+            tool_calendar = card_calendar(summary, end_date, theme, source=tool)
+            if tool_calendar:
+                cards[f"calendar-{tool}-{theme.name}"] = tool_calendar
     return cards
