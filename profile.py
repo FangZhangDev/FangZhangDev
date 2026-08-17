@@ -303,6 +303,7 @@ def aggregate(events: list[dict[str, Any]]) -> tuple[dict[str, dict[str, Any]], 
     sessions: set[str] = set()
     hours = [0] * 24
     weekdays = [0] * 7
+    models_by_source: dict[str, Counter[str]] = {}
     for event in events:
         day = event["timestamp"][:10]
         # 小时/星期分布只统计轮数，不含任何内容，可安全公开
@@ -327,6 +328,7 @@ def aggregate(events: list[dict[str, Any]]) -> tuple[dict[str, dict[str, Any]], 
         model_counts[event["model"]] += event["total_tokens"]
         provider_counts[event["provider"]] += event["total_tokens"]
         source_counts[event["source"]] += event["total_tokens"]
+        models_by_source.setdefault(event["source"], Counter())[event["model"]] += event["total_tokens"]
     for row in daily.values():
         row["sessions"] = len(row["sessions"])
         row["sources"] = dict(sorted(row["sources"].items()))
@@ -344,6 +346,9 @@ def aggregate(events: list[dict[str, Any]]) -> tuple[dict[str, dict[str, Any]], 
         "sources": dict(source_counts), "first_date": next(iter(ordered), None),
         "last_date": next(reversed(ordered), None),
         "hours": hours, "weekdays": weekdays,
+        "models_by_source": {
+            source: dict(counter.most_common()) for source, counter in models_by_source.items()
+        },
     }
     return ordered, summary
 
@@ -427,6 +432,7 @@ def merge_backfill(daily: dict[str, dict[str, Any]], summary: dict[str, Any],
     当成精确数字读。
     """
     added = 0
+    backfilled_models: Counter[str] = Counter()
     for day, by_model in sorted(stats.get("tokens", {}).items()):
         row = daily.get(day)
         # 判断依据是「这天有没有 claude-code 的 transcript」，而不是「这天有没有记录」。
@@ -475,6 +481,15 @@ def merge_backfill(daily: dict[str, dict[str, Any]], summary: dict[str, Any],
     summary["top_models"] = models.most_common(8)
     summary["sources"] = dict(sources)
 
+    # 回填的 token 一定来自 claude-code，并进分工具明细。这里用回填时单独攒的
+    # 计数，而不是去读 row["models"] —— 部分回填的日子里那份 dict 混着 Codex 的
+    # 模型，无法区分谁是回填来的。
+    if backfilled_models:
+        by_source = summary.setdefault("models_by_source", {})
+        claude = Counter(by_source.get("claude-code", {}))
+        claude.update(backfilled_models)
+        by_source["claude-code"] = dict(claude.most_common())
+
     summary["backfilled_days"] = added
     # Claude 的终身累计（stats-cache 的 modelUsage）没有日期维度，无法进热力图，
     # 只作为参考留在 profile.json 里；卡片一律用有日期的口径，保持前后一致。
@@ -485,11 +500,35 @@ def merge_backfill(daily: dict[str, dict[str, Any]], summary: dict[str, Any],
     return ordered, summary
 
 
-def write_ledger(config: Config, daily: dict[str, dict[str, Any]]) -> None:
+def write_ledger(config: Config, daily: dict[str, dict[str, Any]]) -> int:
+    """把当前聚合结果合并进日账本，返回仅存在于旧账本里的天数。
+
+    账本是这个项目唯一的长期归档，所以必须真的只增不减：Claude Code 会删会话
+    记录，聚合缓存也会轮转，如果每次都整份覆盖，那些日子就会从公开账本里悄悄
+    消失 —— 而且是在 git 里显示为删除。已经记下来的日子一律保留，同一天有新数
+    据才覆盖。
+    """
     config.daily_ledger.parent.mkdir(parents=True, exist_ok=True)
+    archived: dict[str, dict[str, Any]] = {}
+    if config.daily_ledger.exists():
+        with config.daily_ledger.open(encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                day = str(row.get("date") or "")
+                if day:
+                    archived[day] = row
+    retained = sum(1 for day in archived if day not in daily)
+    merged = {**archived, **daily}
     with config.daily_ledger.open("w", encoding="utf-8") as handle:
-        for day in daily:
-            handle.write(json.dumps(daily[day], ensure_ascii=False, sort_keys=True) + "\n")
+        for day in sorted(merged):
+            handle.write(json.dumps(merged[day], ensure_ascii=False, sort_keys=True) + "\n")
+    return retained
 
 
 
@@ -500,24 +539,17 @@ GALLERY_END = "<!-- profile:gallery:end -->"
 
 # README 图集布局：每行一个卡片名列表，同行的卡片会并排显示
 GALLERY_ROWS: tuple[tuple[str, ...], ...] = (
-    ("hero",),
     ("heatmap",),
     ("calendar",),
     ("stats", "models"),
-    ("clock", "weekdays"),
-    ("trend",),
     ("terminal",),
 )
 
 CARD_ALT = {
-    "hero": "AI coding profile summary",
-    "heatmap": "Daily activity heatmap",
+    "heatmap": "Token activity heatmap",
     "calendar": "Prompt calendar",
     "stats": "Token split by tool",
     "models": "Top models by usage",
-    "clock": "Hourly coding rhythm",
-    "weekdays": "Weekday distribution",
-    "trend": "Recent 90-day trend",
     "terminal": "Terminal-style summary",
 }
 
@@ -533,28 +565,56 @@ def asset_url(config: Config, name: str, digest: str) -> str:
     return f"./{config.output_dir.as_posix()}/{name}.svg"
 
 
-def gallery_markdown(config: Config, digests: dict[str, str]) -> str:
+def picture(config: Config, card: str, digests: dict[str, str], alt: str, width: int) -> str:
+    """一张亮/暗自适应的图。<picture> 按读者的 GitHub 主题选对应文件。"""
+    dark = asset_url(config, f"{card}-dark", digests.get(f"{card}-dark", ""))
+    light = asset_url(config, f"{card}-light", digests.get(f"{card}-light", ""))
+    return (
+        "<picture>"
+        f'<source media="(prefers-color-scheme: dark)" srcset="{dark}">'
+        f'<source media="(prefers-color-scheme: light)" srcset="{light}">'
+        f'<img alt="{html.escape(alt)}" src="{light}" width="{width}">'
+        "</picture>"
+    )
+
+
+def gallery_markdown(config: Config, digests: dict[str, str],
+                     summary: dict[str, Any]) -> str:
     """生成 README 中的图集区块。
 
     每行独立包在 <p align="center"> 里：GitHub 的 Markdown 会把它当成一个完整
-    HTML 块，比依赖外层 <div> 更稳（块内空行会中断 HTML 解析）。<picture> 负责
-    按读者的亮/暗主题各取一张图。
+    HTML 块，比依赖外层 <div> 更稳（块内空行会中断 HTML 解析）。同一行的多张图
+    之间不能有空白字符，否则会被渲染成词间空格，两张 440 宽的卡片加起来就超过
+    880，和整宽卡片对不齐。
     """
     blocks: list[str] = []
     for row in GALLERY_ROWS:
-        pictures = []
-        for card in row:
-            dark = asset_url(config, f"{card}-dark", digests.get(f"{card}-dark", ""))
-            light = asset_url(config, f"{card}-light", digests.get(f"{card}-light", ""))
-            width = render.CARD_SIZES.get(card, (880, 0))[0]
-            pictures.append(
-                "  <picture>\n"
-                f'    <source media="(prefers-color-scheme: dark)" srcset="{dark}">\n'
-                f'    <source media="(prefers-color-scheme: light)" srcset="{light}">\n'
-                f'    <img alt="{html.escape(CARD_ALT.get(card, card))}" src="{light}" width="{width}">\n'
-                "  </picture>"
-            )
-        blocks.append('<p align="center">\n' + "\n".join(pictures) + "\n</p>")
+        pictures = [
+            picture(config, card, digests, CARD_ALT.get(card, card),
+                    render.CARD_SIZES.get(card, (render.CARD_WIDTH, 0))[0])
+            for card in row
+        ]
+        blocks.append('<p align="center">' + "".join(pictures) + "</p>")
+
+    # 分工具视图。README 里跑不了 JS，<details> 是 GitHub 唯一支持的原生交互，
+    # 所以「只看某个工具」做成折叠区而不是按钮。
+    half = render.HALF_WIDTH
+    for tool in sorted(summary.get("sources", {})):
+        if f"heatmap-{tool}-dark" not in digests:
+            continue
+        share = summary["sources"][tool] / (sum(summary["sources"].values()) or 1)
+        blocks.append(
+            f"<details>\n<summary>&nbsp;<b>{html.escape(tool)}</b> only "
+            f"&nbsp;·&nbsp; {render.compact(summary['sources'][tool])} tokens, "
+            f"{share * 100:.0f}% of total</summary>\n<br>\n"
+            + '<p align="center">'
+            + picture(config, f"heatmap-{tool}", digests,
+                      f"{tool} activity heatmap", render.CARD_WIDTH)
+            + "</p>\n"
+            + '<p align="center">'
+            + picture(config, f"models-{tool}", digests, f"{tool} models", half)
+            + "</p>\n</details>"
+        )
     return "\n\n".join(blocks)
 
 
@@ -586,8 +646,8 @@ def write_outputs(config: Config, daily: dict[str, dict[str, Any]], summary: dic
         (config.output_dir / f"{name}.svg").write_text(markup, encoding="utf-8")
         digests[name] = hashlib.sha256(markup.encode("utf-8")).hexdigest()[:8]
 
-    # 兼容旧引用：profile.svg 始终等于暗色主视觉卡
-    (config.output_dir / "profile.svg").write_text(cards["hero-dark"], encoding="utf-8")
+    # 兼容旧引用：profile.svg 始终指向当前的主视觉卡（现在是热力图）
+    (config.output_dir / "profile.svg").write_text(cards["heatmap-dark"], encoding="utf-8")
 
     payload = {"daily": daily, "summary": summary}
     (config.output_dir / "profile.json").write_text(
@@ -596,7 +656,7 @@ def write_outputs(config: Config, daily: dict[str, dict[str, Any]], summary: dic
     (config.output_dir / "profile.html").write_text(
         render.report_html(config.title, config.subtitle, cards, summary), encoding="utf-8"
     )
-    update_readme(config, gallery_markdown(config, digests))
+    update_readme(config, gallery_markdown(config, digests, summary))
 
 
 def run_update(config: Config) -> None:
@@ -606,10 +666,14 @@ def run_update(config: Config) -> None:
     daily, summary = merge_backfill(
         daily, summary, read_stats_cache(config), read_prompt_calendar(config)
     )
-    write_ledger(config, daily)
+    retained = write_ledger(config, daily)
     write_outputs(config, daily, summary)
-    report = {k: v for k, v in summary.items() if k != "prompt_calendar"}
-    print(json.dumps({"changed_files": changed, **report}, ensure_ascii=False, indent=2))
+    report = {k: v for k, v in summary.items()
+              if k not in ("prompt_calendar", "models_by_source")}
+    print(json.dumps(
+        {"changed_files": changed, "ledger_only_days": retained, **report},
+        ensure_ascii=False, indent=2,
+    ))
 
 
 def run_validate(config: Config) -> None:

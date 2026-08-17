@@ -9,8 +9,8 @@ documentation lives here instead.
 Turns local Claude Code and Codex activity into a long-lived, public-safe profile:
 
 - normalized daily usage records suitable for a public Git repository;
-- nine SVG views (summary, token heatmap, prompt calendar, tool split, model ranking, hourly
-  rhythm, weekday shape, 90-day trend, terminal card), each in a light and a dark variant;
+- five SVG views (token heatmap, prompt calendar, tool split, model ranking, terminal card),
+  each in a light and a dark variant, plus a per-tool heatmap and model card for every tool;
 - an incremental SQLite cache so recurring updates do not reparse unchanged files;
 - an offline HTML report with a theme toggle.
 
@@ -36,8 +36,8 @@ a scheduled runner.
 
 ```toml
 [profile]
-title = "Your Name"          # large heading on the hero card
-subtitle = "…"               # one line under it
+title = "Your Name"          # used in the terminal card title bar
+subtitle = "…"               # shown in the local HTML report
 timezone = "Asia/Shanghai"   # buckets events into local days and hours
 window_days = 365            # heatmap window
 repo = "you/you"             # builds raw.githubusercontent URLs for the README
@@ -46,6 +46,8 @@ branch = "main"
 [paths]
 claude_glob  = "~/.claude/projects/**/*.jsonl"
 codex_homes  = ["~/.codex", "~/.local/state/agent-config/codex/*"]
+claude_stats_cache = "~/.claude/stats-cache.json"   # backfill, see below
+claude_history     = "~/.claude/history.jsonl"      # prompt calendar
 cache_db     = "data/profile.sqlite"   # local only, git-ignored
 daily_ledger = "data/daily.jsonl"      # public
 output_dir   = "dist"                  # public
@@ -60,8 +62,8 @@ Leave `repo` empty to emit repository-relative image paths instead of absolute r
 | --- | --- | --- |
 | `data/daily.jsonl` | public | append-only daily ledger |
 | `data/profile.sqlite` | local | incremental parse cache, git-ignored |
-| `dist/*-dark.svg`, `dist/*-light.svg` | public | the eight cards, both themes |
-| `dist/profile.svg` | public | alias for the dark hero card, kept for old embeds |
+| `dist/*-dark.svg`, `dist/*-light.svg` | public | every card, both themes |
+| `dist/profile.svg` | public | alias for the dark heatmap, kept for old embeds |
 | `dist/profile.html` | local | offline report with a theme toggle, git-ignored |
 | `dist/profile.json` | public | machine-readable daily rows plus summary |
 
@@ -79,7 +81,14 @@ Everything outside the markers is hand-written and never touched. Each image URL
 a new card the moment it actually changes — and not before.
 
 Card layout is declared in `GALLERY_ROWS` in `profile.py`; cards on the same row render side by
-side. Drop a card by removing its name, reorder rows freely.
+side. Drop a card by removing its name, reorder rows freely. Half-width cards are exactly
+`CARD_WIDTH / 2`, and the generator emits them with no whitespace between the `<picture>` tags —
+a newline there renders as a word space and pushes the pair past the full-width cards, which is
+exactly the misalignment it is there to prevent.
+
+Per-tool views are `<details>` blocks. A README cannot run JavaScript and an SVG served through
+camo does not respond to clicks, so real filter buttons are impossible on GitHub; the disclosure
+widget is the only native interaction available. `dist/profile.html` does have real buttons.
 
 Links in the root README are written out in full rather than as `./docs/README.md`. A profile
 README renders at `github.com/<user>`, so a relative link resolves against the user page instead
@@ -97,6 +106,11 @@ of the repository and lands on a 404. Inside `docs/` relative links are fine.
   more reliable across browsers than a media query inside a single SVG.
 - Both palettes live in the `DARK` and `LIGHT` `Theme` instances at the top of `render.py`.
   Change colors there and every card follows.
+- Card chrome, type scale, cell geometry (`CELL` / `GAP` / `RADIUS`), the month scale and the
+  `Less □□□□□ More` legend all mirror GitHub's contribution box, so the cards sit on a profile
+  without looking imported. The ramps deliberately do **not** use GitHub's green: these grids
+  count tokens and prompts, and borrowing the commit colors would invite reading them as commits.
+  `ramp` is violet for tokens, `ramp_alt` cyan for prompts — two metrics, two hues.
 
 ## Long-term publishing
 
@@ -143,6 +157,20 @@ Merge rules, in `merge_backfill`:
   the cards always reconcile with the ledger.
 - `history.jsonl` supplies only per-day prompt counts for the calendar card. Prompt text and
   project paths are never read into memory beyond the line being parsed, and never written out.
+
+### Codex
+
+Codex needs no equivalent fallback. It ships no cleanup setting, and every `rollout_path` recorded
+in `state_5.sqlite` still resolves to a file on disk across all configured homes — nothing has been
+pruned. Its earliest session is therefore a real start date, not a truncation artifact. Note that
+`logs_2.sqlite` *does* roll over after a few days, but that is application logging, not usage data,
+and nothing reads it.
+
+Because Codex has no aggregate cache to fall back on, `data/daily.jsonl` is its only long-term
+archive. That is why `write_ledger` merges rather than overwrites: a day already recorded survives
+even if its source file later disappears.
+
+### Stopping the loss
 
 Raise the retention period to stop losing data going forward:
 

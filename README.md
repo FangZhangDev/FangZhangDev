@@ -1,69 +1,25 @@
 <!-- profile:gallery:begin -->
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/hero-dark.svg?v=63ef946b">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/hero-light.svg?v=d319304c">
-    <img alt="AI coding profile summary" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/hero-light.svg?v=d319304c" width="880">
-  </picture>
-</p>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/heatmap-dark.svg?v=8afc1b51"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/heatmap-light.svg?v=1e0b018f"><img alt="Token activity heatmap" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/heatmap-light.svg?v=1e0b018f" width="880"></picture></p>
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/heatmap-dark.svg?v=13c936bf">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/heatmap-light.svg?v=5d259a56">
-    <img alt="Daily activity heatmap" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/heatmap-light.svg?v=5d259a56" width="880">
-  </picture>
-</p>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/calendar-dark.svg?v=39403e55"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/calendar-light.svg?v=ebb0e83a"><img alt="Prompt calendar" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/calendar-light.svg?v=ebb0e83a" width="880"></picture></p>
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/calendar-dark.svg?v=d6aeec96">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/calendar-light.svg?v=d0a8dc67">
-    <img alt="Prompt calendar" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/calendar-light.svg?v=d0a8dc67" width="880">
-  </picture>
-</p>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/stats-dark.svg?v=dbf353f7"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/stats-light.svg?v=36e185b3"><img alt="Token split by tool" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/stats-light.svg?v=36e185b3" width="440"></picture><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/models-dark.svg?v=e62d3b37"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/models-light.svg?v=1921ab82"><img alt="Top models by usage" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/models-light.svg?v=1921ab82" width="440"></picture></p>
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/stats-dark.svg?v=9939c5d3">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/stats-light.svg?v=621a9357">
-    <img alt="Token split by tool" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/stats-light.svg?v=621a9357" width="435">
-  </picture>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/models-dark.svg?v=3496adc7">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/models-light.svg?v=21b32133">
-    <img alt="Top models by usage" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/models-light.svg?v=21b32133" width="435">
-  </picture>
-</p>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/terminal-dark.svg?v=1d79f97a"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/terminal-light.svg?v=6076bc2d"><img alt="Terminal-style summary" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/terminal-light.svg?v=6076bc2d" width="880"></picture></p>
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/clock-dark.svg?v=53098009">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/clock-light.svg?v=9716073b">
-    <img alt="Hourly coding rhythm" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/clock-light.svg?v=9716073b" width="435">
-  </picture>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/weekdays-dark.svg?v=460338bc">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/weekdays-light.svg?v=4454dfc4">
-    <img alt="Weekday distribution" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/weekdays-light.svg?v=4454dfc4" width="435">
-  </picture>
-</p>
+<details>
+<summary>&nbsp;<b>claude-code</b> only &nbsp;·&nbsp; 5.31B tokens, 61% of total</summary>
+<br>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/heatmap-claude-code-dark.svg?v=53077b85"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/heatmap-claude-code-light.svg?v=c3ab4902"><img alt="claude-code activity heatmap" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/heatmap-claude-code-light.svg?v=c3ab4902" width="880"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/models-claude-code-dark.svg?v=e4596c13"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/models-claude-code-light.svg?v=b87fe465"><img alt="claude-code models" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/models-claude-code-light.svg?v=b87fe465" width="440"></picture></p>
+</details>
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/trend-dark.svg?v=fc768604">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/trend-light.svg?v=1f7db07a">
-    <img alt="Recent 90-day trend" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/trend-light.svg?v=1f7db07a" width="880">
-  </picture>
-</p>
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/terminal-dark.svg?v=b31fa5ce">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/terminal-light.svg?v=e7419ea2">
-    <img alt="Terminal-style summary" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/terminal-light.svg?v=e7419ea2" width="880">
-  </picture>
-</p>
+<details>
+<summary>&nbsp;<b>codex</b> only &nbsp;·&nbsp; 3.39B tokens, 39% of total</summary>
+<br>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/heatmap-codex-dark.svg?v=9d4fe3df"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/heatmap-codex-light.svg?v=ede4d2a5"><img alt="codex activity heatmap" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/heatmap-codex-light.svg?v=ede4d2a5" width="880"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/models-codex-dark.svg?v=019eb8e6"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/models-codex-light.svg?v=9c4029e6"><img alt="codex models" src="https://raw.githubusercontent.com/FangZhangDev/FangZhangDev/main/dist/models-codex-light.svg?v=9c4029e6" width="440"></picture></p>
+</details>
 <!-- profile:gallery:end -->
 
 <p align="center">
