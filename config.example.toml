@@ -14,6 +14,9 @@ codex_homes = [
   "~/.codex",
   "~/.local/state/agent-config/codex/*",
 ]
+# 会话记录被 cleanupPeriodDays 清掉后，这两份文件仍留着更早的历史
+claude_stats_cache = "~/.claude/stats-cache.json"
+claude_history = "~/.claude/history.jsonl"
 cache_db = "data/profile.sqlite"
 daily_ledger = "data/daily.jsonl"
 output_dir = "dist"

@@ -99,18 +99,21 @@
     "2026-06-22": {
       "date": "2026-06-22",
       "sources": {
+        "claude-code": 71916,
         "codex": 8843955
       },
       "models": {
+        "astron-code-latest": 71916,
         "gpt-5.5": 8843955
       },
-      "sessions": 1,
+      "sessions": 2,
       "turns": 57,
       "input_tokens": 8774946,
       "output_tokens": 69009,
       "cache_read_tokens": 8024448,
       "cache_write_tokens": 0,
-      "total_tokens": 8843955
+      "total_tokens": 8915871,
+      "estimated": true
     },
     "2026-06-23": {
       "date": "2026-06-23",
@@ -211,57 +214,104 @@
     "2026-06-29": {
       "date": "2026-06-29",
       "sources": {
+        "claude-code": 66481449,
         "codex": 18170532
       },
       "models": {
+        "glm-5.2": 66481449,
         "gpt-5.5": 18170532
       },
-      "sessions": 1,
+      "sessions": 9,
       "turns": 129,
       "input_tokens": 18096317,
       "output_tokens": 74215,
       "cache_read_tokens": 17817344,
       "cache_write_tokens": 0,
-      "total_tokens": 18170532
+      "total_tokens": 84651981,
+      "estimated": true
     },
     "2026-06-30": {
       "date": "2026-06-30",
       "sources": {
+        "claude-code": 89869191,
         "codex": 1592558
       },
       "models": {
+        "astron-code-latest": 30296924,
+        "glm-5.2": 59572267,
         "gpt-5.5": 1592558
       },
-      "sessions": 1,
+      "sessions": 5,
       "turns": 26,
       "input_tokens": 1576976,
       "output_tokens": 15582,
       "cache_read_tokens": 1362688,
       "cache_write_tokens": 0,
-      "total_tokens": 1592558
+      "total_tokens": 91461749,
+      "estimated": true
+    },
+    "2026-07-01": {
+      "date": "2026-07-01",
+      "sources": {
+        "claude-code": 47428812
+      },
+      "models": {
+        "astron-code-latest": 47428812
+      },
+      "sessions": 7,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "total_tokens": 47428812,
+      "estimated": true
+    },
+    "2026-07-02": {
+      "date": "2026-07-02",
+      "sources": {
+        "claude-code": 30737842
+      },
+      "models": {
+        "astron-code-latest": 30737842
+      },
+      "sessions": 1,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "total_tokens": 30737842,
+      "estimated": true
     },
     "2026-07-03": {
       "date": "2026-07-03",
       "sources": {
+        "claude-code": 87664048,
         "codex": 1353022
       },
       "models": {
+        "astron-code-latest": 19402452,
+        "glm-5.2": 68261596,
         "gpt-5.5": 1353022
       },
-      "sessions": 1,
+      "sessions": 4,
       "turns": 17,
       "input_tokens": 1341563,
       "output_tokens": 11459,
       "cache_read_tokens": 1226496,
       "cache_write_tokens": 0,
-      "total_tokens": 1353022
+      "total_tokens": 89017070,
+      "estimated": true
     },
     "2026-07-04": {
       "date": "2026-07-04",
       "sources": {
+        "claude-code": 43805215,
         "codex": 1346528
       },
       "models": {
+        "glm-5.2": 43805215,
         "gpt-5.5": 1346528
       },
       "sessions": 1,
@@ -270,14 +320,17 @@
       "output_tokens": 5815,
       "cache_read_tokens": 1032960,
       "cache_write_tokens": 0,
-      "total_tokens": 1346528
+      "total_tokens": 45151743,
+      "estimated": true
     },
     "2026-07-05": {
       "date": "2026-07-05",
       "sources": {
+        "claude-code": 71164755,
         "codex": 20188915
       },
       "models": {
+        "glm-5.2": 71164755,
         "gpt-5.5": 20188915
       },
       "sessions": 1,
@@ -286,40 +339,119 @@
       "output_tokens": 58740,
       "cache_read_tokens": 19853312,
       "cache_write_tokens": 0,
-      "total_tokens": 20188915
+      "total_tokens": 91353670,
+      "estimated": true
+    },
+    "2026-07-06": {
+      "date": "2026-07-06",
+      "sources": {
+        "claude-code": 174751258
+      },
+      "models": {
+        "glm-5.2": 174751258
+      },
+      "sessions": 10,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "total_tokens": 174751258,
+      "estimated": true
+    },
+    "2026-07-07": {
+      "date": "2026-07-07",
+      "sources": {
+        "claude-code": 195628472
+      },
+      "models": {
+        "glm-5.2": 195628472
+      },
+      "sessions": 5,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "total_tokens": 195628472,
+      "estimated": true
+    },
+    "2026-07-08": {
+      "date": "2026-07-08",
+      "sources": {
+        "claude-code": 65725918
+      },
+      "models": {
+        "astron-code-latest": 48966009,
+        "glm-5.2": 16759909
+      },
+      "sessions": 9,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "total_tokens": 65725918,
+      "estimated": true
     },
     "2026-07-10": {
       "date": "2026-07-10",
       "sources": {
+        "claude-code": 137085036,
         "codex": 2393614
       },
       "models": {
+        "astron-code-latest": 83576051,
+        "glm-5-2-260617": 53463159,
+        "glm-5.2": 45826,
         "gpt-5.5": 2393614
       },
-      "sessions": 1,
+      "sessions": 6,
       "turns": 24,
       "input_tokens": 2366974,
       "output_tokens": 26640,
       "cache_read_tokens": 2006528,
       "cache_write_tokens": 0,
-      "total_tokens": 2393614
+      "total_tokens": 139478650,
+      "estimated": true
     },
     "2026-07-11": {
       "date": "2026-07-11",
       "sources": {
+        "claude-code": 240805116,
         "codex": 7304757
       },
       "models": {
+        "glm-5-2-260617": 26234129,
+        "glm-5.2": 214570987,
         "gpt-5.5": 1463779,
         "gpt-5.6-sol": 5840978
       },
-      "sessions": 2,
+      "sessions": 6,
       "turns": 62,
       "input_tokens": 7267211,
       "output_tokens": 37546,
       "cache_read_tokens": 6737792,
       "cache_write_tokens": 0,
-      "total_tokens": 7304757
+      "total_tokens": 248109873,
+      "estimated": true
+    },
+    "2026-07-12": {
+      "date": "2026-07-12",
+      "sources": {
+        "claude-code": 87784999
+      },
+      "models": {
+        "glm-5.2": 87784999
+      },
+      "sessions": 2,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "total_tokens": 87784999,
+      "estimated": true
     },
     "2026-07-13": {
       "date": "2026-07-13",
@@ -941,34 +1073,34 @@
     "2026-08-17": {
       "date": "2026-08-17",
       "sources": {
-        "claude-code": 80807234,
+        "claude-code": 92901127,
         "codex": 78475629
       },
       "models": {
-        "claude-opus-5": 67577227,
+        "claude-opus-5": 79671120,
         "codex-auto-review": 225539,
         "glm-5.3": 13230007,
         "gpt-5.6-luna": 14843431,
         "gpt-5.6-sol": 63406659
       },
       "sessions": 7,
-      "turns": 1043,
-      "input_tokens": 78408874,
-      "output_tokens": 1049363,
-      "cache_read_tokens": 154789908,
-      "cache_write_tokens": 962014,
-      "total_tokens": 159282863
+      "turns": 1111,
+      "input_tokens": 78409010,
+      "output_tokens": 1123139,
+      "cache_read_tokens": 166711887,
+      "cache_write_tokens": 1060016,
+      "total_tokens": 171376756
     }
   },
   "summary": {
-    "total_tokens": 7332228117,
-    "input_tokens": 3975639786,
-    "output_tokens": 34461135,
-    "cache_read_tokens": 6532207080,
-    "cache_write_tokens": 65028688,
-    "active_days": 53,
-    "sessions": 299,
-    "turns": 48335,
+    "total_tokens": 8683326037,
+    "input_tokens": 3975639922,
+    "output_tokens": 34534911,
+    "cache_read_tokens": 6544129059,
+    "cache_write_tokens": 65126690,
+    "active_days": 59,
+    "sessions": 422,
+    "turns": 48403,
     "top_models": [
       [
         "gpt-5.6-sol",
@@ -976,19 +1108,23 @@
       ],
       [
         "claude-opus-5",
-        2277881650
+        2289975543
       ],
       [
         "glm-5.2",
-        1118863853
+        2117690586
       ],
       [
         "astron-code-latest",
-        488063676
+        748543682
       ],
       [
         "gpt-5.5",
         176584150
+      ],
+      [
+        "glm-5-2-260617",
+        79697288
       ],
       [
         "glm-5.3",
@@ -997,16 +1133,12 @@
       [
         "deepseek-v4-flash",
         31129321
-      ],
-      [
-        "gpt-5.6-terra",
-        23490403
       ]
     ],
     "top_providers": [
       [
         "claude-code",
-        3940317296
+        3952411189
       ],
       [
         "openai",
@@ -1027,7 +1159,7 @@
     ],
     "sources": {
       "codex": 3391910821,
-      "claude-code": 3940317296
+      "claude-code": 5291415216
     },
     "first_date": "2026-06-12",
     "last_date": "2026-08-17",
@@ -1044,7 +1176,7 @@
       1096,
       3112,
       4190,
-      4118,
+      4186,
       2627,
       3924,
       4436,
@@ -1058,13 +1190,155 @@
       923
     ],
     "weekdays": [
-      11442,
+      11510,
       6437,
       12878,
       4067,
       5363,
       3765,
       4383
-    ]
+    ],
+    "backfilled_days": 14,
+    "claude_lifetime_tokens": 5844390575,
+    "prompt_calendar": {
+      "2025-09-30": 41,
+      "2025-10-15": 10,
+      "2025-10-16": 67,
+      "2025-10-20": 17,
+      "2025-10-21": 60,
+      "2025-10-22": 29,
+      "2025-10-23": 35,
+      "2025-10-24": 54,
+      "2025-10-27": 39,
+      "2025-10-28": 41,
+      "2025-10-29": 10,
+      "2025-10-30": 5,
+      "2025-11-02": 1,
+      "2025-11-03": 43,
+      "2025-11-05": 5,
+      "2025-11-14": 10,
+      "2025-11-17": 20,
+      "2025-11-19": 2,
+      "2025-11-25": 3,
+      "2025-11-26": 2,
+      "2025-12-02": 6,
+      "2025-12-05": 25,
+      "2025-12-06": 1,
+      "2025-12-07": 4,
+      "2025-12-21": 24,
+      "2025-12-22": 1,
+      "2025-12-26": 29,
+      "2025-12-28": 12,
+      "2025-12-29": 16,
+      "2025-12-30": 10,
+      "2025-12-31": 6,
+      "2026-01-02": 10,
+      "2026-01-05": 1,
+      "2026-01-06": 21,
+      "2026-01-07": 2,
+      "2026-01-09": 9,
+      "2026-01-10": 12,
+      "2026-01-11": 3,
+      "2026-01-12": 2,
+      "2026-01-13": 14,
+      "2026-01-14": 8,
+      "2026-01-15": 50,
+      "2026-01-16": 3,
+      "2026-01-20": 12,
+      "2026-01-21": 28,
+      "2026-01-22": 31,
+      "2026-01-23": 24,
+      "2026-01-25": 6,
+      "2026-01-26": 18,
+      "2026-01-30": 5,
+      "2026-02-05": 8,
+      "2026-02-26": 1,
+      "2026-03-03": 4,
+      "2026-03-04": 1,
+      "2026-03-06": 17,
+      "2026-03-09": 1,
+      "2026-03-12": 3,
+      "2026-03-16": 1,
+      "2026-03-20": 24,
+      "2026-03-23": 15,
+      "2026-03-24": 1,
+      "2026-03-25": 1,
+      "2026-03-31": 5,
+      "2026-04-13": 1,
+      "2026-04-18": 2,
+      "2026-04-21": 1,
+      "2026-05-06": 6,
+      "2026-05-07": 20,
+      "2026-05-08": 9,
+      "2026-05-09": 73,
+      "2026-05-10": 11,
+      "2026-05-11": 7,
+      "2026-05-24": 43,
+      "2026-05-25": 13,
+      "2026-05-26": 36,
+      "2026-05-30": 3,
+      "2026-06-04": 27,
+      "2026-06-05": 14,
+      "2026-06-08": 12,
+      "2026-06-11": 4,
+      "2026-06-12": 5,
+      "2026-06-14": 22,
+      "2026-06-15": 86,
+      "2026-06-16": 15,
+      "2026-06-17": 11,
+      "2026-06-19": 3,
+      "2026-06-20": 4,
+      "2026-06-22": 24,
+      "2026-06-23": 7,
+      "2026-06-24": 50,
+      "2026-06-25": 30,
+      "2026-06-26": 32,
+      "2026-06-29": 21,
+      "2026-06-30": 71,
+      "2026-07-01": 23,
+      "2026-07-02": 8,
+      "2026-07-03": 15,
+      "2026-07-04": 7,
+      "2026-07-05": 26,
+      "2026-07-06": 72,
+      "2026-07-07": 52,
+      "2026-07-08": 84,
+      "2026-07-10": 65,
+      "2026-07-11": 20,
+      "2026-07-12": 10,
+      "2026-07-13": 56,
+      "2026-07-14": 49,
+      "2026-07-15": 104,
+      "2026-07-16": 57,
+      "2026-07-17": 13,
+      "2026-07-18": 6,
+      "2026-07-19": 1,
+      "2026-07-20": 43,
+      "2026-07-21": 14,
+      "2026-07-22": 5,
+      "2026-07-23": 9,
+      "2026-07-24": 68,
+      "2026-07-25": 62,
+      "2026-07-26": 40,
+      "2026-07-27": 78,
+      "2026-07-28": 25,
+      "2026-07-29": 9,
+      "2026-08-02": 14,
+      "2026-08-03": 29,
+      "2026-08-04": 61,
+      "2026-08-05": 32,
+      "2026-08-06": 4,
+      "2026-08-08": 9,
+      "2026-08-09": 15,
+      "2026-08-11": 4,
+      "2026-08-12": 5,
+      "2026-08-13": 32,
+      "2026-08-14": 141,
+      "2026-08-15": 52,
+      "2026-08-16": 18,
+      "2026-08-17": 16
+    },
+    "prompt_total": 3085,
+    "prompt_first": "2025-09-30"
   }
 }

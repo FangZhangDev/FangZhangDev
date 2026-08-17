@@ -372,6 +372,85 @@ def card_heatmap(daily: dict[str, dict[str, Any]], end_date: date, window_days: 
     return "".join(out) + "</svg>"
 
 
+def card_calendar(summary: dict[str, Any], end_date: date, theme: Theme) -> str:
+    """提示日历：覆盖期比 token 热力图长得多，指标单一（每日提示条数）。
+
+    Claude Code 删掉会话记录后 token 就不可考了，但提示历史留着，所以这张卡能
+    一路回溯到最早的使用记录。刻意和 token 热力图分开，避免一张图混两种口径。
+    """
+    uid = f"k{theme.name}"
+    width, height = 880, 200
+    cell, gap = 11, 3
+    pitch = cell + gap
+
+    calendar = summary.get("prompt_calendar") or {}
+    if not calendar:
+        return ""
+    start = date.fromisoformat(min(calendar))
+    start -= timedelta(days=(start.weekday() + 1) % 7)  # 对齐到周日
+    days = (end_date - start).days + 1
+    columns = math.ceil(days / 7)
+
+    grid_width = columns * pitch - gap
+    left = max(46, round((width - grid_width) / 2))
+    top = 74
+
+    values = [
+        calendar.get((start + timedelta(days=index)).isoformat(), 0) for index in range(days)
+    ]
+    levels = intensity_levels(values)
+
+    out = [open_svg(width, height, "Prompt calendar"), base_style(theme),
+           frame(uid, width, height, theme)]
+    delays = "".join(
+        f".{uid}d{column}{{animation-delay:{.15 + column * .008:.3f}s}}"
+        for column in range(columns)
+    )
+    out.append(
+        f"<style>{delays}</style>"
+        f'<defs><rect id="{uid}c" width="{cell}" height="{cell}" rx="2.5"/></defs>'
+    )
+    out.append('<g class="fu">')
+    out.append(eyebrow(30, 40, "prompt calendar", theme, 3))
+    active = sum(1 for value in values if value > 0)
+    out.append(
+        f'<text class="sub" x="{width - 30}" y="40" text-anchor="end">'
+        f'{esc(compact(summary.get("prompt_total", 0)))} prompts · {active} active days '
+        f'since {esc(min(calendar))}</text>'
+    )
+    out.append("</g>")
+
+    last_month = None
+    for column in range(columns):
+        day = start + timedelta(days=column * 7)
+        if day > end_date:
+            break
+        if day.month != last_month:
+            last_month = day.month
+            x = left + column * pitch
+            if x < left + grid_width - 16:
+                out.append(f'<text class="tick" x="{x}" y="{top - 8}">{MONTHS[day.month - 1]}</text>')
+
+    for label, row in (("Mon", 1), ("Wed", 3), ("Fri", 5)):
+        out.append(
+            f'<text class="tick" x="{left - 10}" y="{top + row * pitch + 9}" '
+            f'text-anchor="end">{label}</text>'
+        )
+
+    for index, value in enumerate(values):
+        column, row = index // 7, index % 7
+        out.append(
+            f'<use class="po {uid}d{column}" href="#{uid}c" x="{left + column * pitch}" '
+            f'y="{top + row * pitch}" fill="{theme.ramp[levels.get(value, 0)]}"/>'
+        )
+
+    out.append(
+        f'<text class="tick" x="{left}" y="{top + 7 * pitch + 14}">'
+        f'Prompts submitted to Claude Code · timestamps only, no content read</text>'
+    )
+    return "".join(out) + "</svg>"
+
+
 # ---------------------------------------------------------------- 卡片：概览环
 
 
@@ -766,7 +845,8 @@ def card_terminal(summary: dict[str, Any], theme: Theme, title: str) -> str:
 # ---------------------------------------------------------------- HTML 报告
 
 
-CARD_ORDER = ("hero", "heatmap", "stats", "models", "clock", "weekdays", "trend", "terminal")
+CARD_ORDER = ("hero", "heatmap", "calendar", "stats", "models", "clock", "weekdays",
+              "trend", "terminal")
 
 
 def report_html(title: str, subtitle: str, cards: dict[str, str],
@@ -833,6 +913,7 @@ h2{{font-size:14px;margin:0;letter-spacing:-.2px}}
 CARD_SIZES = {
     "hero": (880, 218),
     "heatmap": (880, 200),
+    "calendar": (880, 200),
     "stats": (435, 252),
     "models": (435, 252),
     "clock": (435, 252),
@@ -860,6 +941,9 @@ def build_cards(daily: dict[str, dict[str, Any]], summary: dict[str, Any],
     for theme in THEMES:
         cards[f"hero-{theme.name}"] = card_hero(summary, series, theme, title, subtitle)
         cards[f"heatmap-{theme.name}"] = card_heatmap(daily, end_date, window_days, summary, theme)
+        calendar = card_calendar(summary, end_date, theme)
+        if calendar:
+            cards[f"calendar-{theme.name}"] = calendar
         cards[f"stats-{theme.name}"] = card_stats(summary, theme)
         cards[f"models-{theme.name}"] = card_models(summary, theme)
         cards[f"clock-{theme.name}"] = card_clock(summary, theme)

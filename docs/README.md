@@ -9,8 +9,8 @@ documentation lives here instead.
 Turns local Claude Code and Codex activity into a long-lived, public-safe profile:
 
 - normalized daily usage records suitable for a public Git repository;
-- eight SVG views (summary, heatmap, tool split, model ranking, hourly rhythm, weekday shape,
-  90-day trend, terminal card), each in a light and a dark variant;
+- nine SVG views (summary, token heatmap, prompt calendar, tool split, model ranking, hourly
+  rhythm, weekday shape, 90-day trend, terminal card), each in a light and a dark variant;
 - an incremental SQLite cache so recurring updates do not reparse unchanged files;
 - an offline HTML report with a theme toggle.
 
@@ -117,6 +117,40 @@ git commit -m "chore: update coding activity profile"
 git push
 ```
 
+## Retention and backfill
+
+Claude Code deletes local session transcripts after `cleanupPeriodDays` (default 30). A collector
+that reads only transcripts therefore watches its own history evaporate — early activity vanishes
+a month after it happened. Two files survive that cleanup and are read as a fallback:
+
+| Source | Coverage | Carries tokens |
+| --- | --- | --- |
+| session transcripts | last `cleanupPeriodDays` days | yes, split into input / output / cache |
+| `stats-cache.json` → `dailyModelTokens` | since the feature shipped | yes, per model, no split |
+| `stats-cache.json` → `dailyActivity` | since `firstSessionDate` | no, sessions and messages only |
+| `stats-cache.json` → `modelUsage` | all time | yes, but **undated** |
+| `history.jsonl` | longest of all | no, prompt timestamps only |
+
+Merge rules, in `merge_backfill`:
+
+- Transcripts always win. A day is backfilled only where transcripts carry no `claude-code`
+  contribution — tested per source, not per day, because early days often hold Codex records that
+  would otherwise mask a missing Claude contribution.
+- Backfilled rows get `"estimated": true`. They have a real `total_tokens` but zeroed
+  `input_tokens` / `output_tokens` / `cache_*`, since the aggregate cache does not break tokens down.
+- `modelUsage` has no date axis, so it never enters the heatmap. It is recorded in the summary as
+  `claude_lifetime_tokens` for reference only; every card uses the dated figures so the numbers on
+  the cards always reconcile with the ledger.
+- `history.jsonl` supplies only per-day prompt counts for the calendar card. Prompt text and
+  project paths are never read into memory beyond the line being parsed, and never written out.
+
+Raise the retention period to stop losing data going forward:
+
+```json
+// ~/.claude/settings.json
+{ "cleanupPeriodDays": 3650 }
+```
+
 ## Data model
 
 Each row in `data/daily.jsonl`:
@@ -131,6 +165,7 @@ Each row in `data/daily.jsonl`:
 | `input_tokens` / `output_tokens` | reported usage units |
 | `cache_read_tokens` / `cache_write_tokens` | prompt-cache traffic, kept separate |
 | `total_tokens` | sum of the four token fields |
+| `estimated` | present and `true` when part of the day came from the aggregate cache rather than a transcript, meaning `total_tokens` is real but the four component fields are not |
 
 Token fields are reported usage units, not a bill. Cached input is tracked separately so the
 public cards can quote a less misleading activity metric.

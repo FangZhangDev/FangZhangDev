@@ -58,6 +58,8 @@ class Config:
     branch: str
     claude_glob: str
     codex_homes: tuple[str, ...]
+    claude_stats_cache: str
+    claude_history: str
     cache_db: Path
     daily_ledger: Path
     output_dir: Path
@@ -82,6 +84,8 @@ def load_config(path: Path) -> Config:
         branch=str(profile.get("branch", "main")),
         claude_glob=str(paths.get("claude_glob", "")),
         codex_homes=tuple(str(item) for item in paths.get("codex_homes", [])),
+        claude_stats_cache=str(paths.get("claude_stats_cache", "")),
+        claude_history=str(paths.get("claude_history", "")),
         cache_db=Path(paths.get("cache_db", "data/profile.sqlite")),
         daily_ledger=Path(paths.get("daily_ledger", "data/daily.jsonl")),
         output_dir=Path(paths.get("output_dir", "dist")),
@@ -344,6 +348,143 @@ def aggregate(events: list[dict[str, Any]]) -> tuple[dict[str, dict[str, Any]], 
     return ordered, summary
 
 
+# ---------------------------------------------------------------- 历史回填
+#
+# Claude Code 默认 30 天就删掉本地会话记录（cleanupPeriodDays），所以只读
+# transcript 会让早期活动凭空消失。两份不受该清理影响的文件可以补回来：
+#
+#   ~/.claude/stats-cache.json  聚合统计。dailyModelTokens 有每日每模型 token
+#                               （但没有 input/output/cache 拆分）；dailyActivity
+#                               有更早的消息/会话数，没有 token。
+#   ~/.claude/history.jsonl     提示历史，覆盖期最长。只取时间戳算每日条数，
+#                               提示原文和项目路径一律不读进来。
+
+
+def read_stats_cache(config: Config) -> dict[str, Any]:
+    """读 Claude Code 的聚合统计缓存。文件缺失或损坏都只当作没有回填数据。"""
+    if not config.claude_stats_cache:
+        return {}
+    path = Path(os.path.expanduser(config.claude_stats_cache))
+    if not path.exists():
+        return {}
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+    tokens: dict[str, dict[str, int]] = {}
+    for row in raw.get("dailyModelTokens") or []:
+        day = str(row.get("date") or "")
+        by_model = row.get("tokensByModel") or {}
+        if day and isinstance(by_model, dict):
+            tokens[day] = {str(k): number(v) for k, v in by_model.items()}
+    activity: dict[str, int] = {}
+    for row in raw.get("dailyActivity") or []:
+        day = str(row.get("date") or "")
+        if day:
+            activity[day] = number(row.get("sessionCount"))
+    lifetime = 0
+    for usage in (raw.get("modelUsage") or {}).values():
+        if isinstance(usage, dict):
+            lifetime += sum(
+                number(usage.get(key)) for key in
+                ("inputTokens", "outputTokens", "cacheReadInputTokens", "cacheCreationInputTokens")
+            )
+    return {"tokens": tokens, "sessions": activity, "lifetime_tokens": lifetime,
+            "first_session": str(raw.get("firstSessionDate") or "")[:10]}
+
+
+def read_prompt_calendar(config: Config) -> dict[str, int]:
+    """从提示历史里数出每天提交了多少条提示。只读时间戳。"""
+    if not config.claude_history:
+        return {}
+    path = Path(os.path.expanduser(config.claude_history))
+    if not path.exists():
+        return {}
+    zone = ZoneInfo(config.timezone_name)
+    counts: Counter[str] = Counter()
+    try:
+        with path.open(encoding="utf-8", errors="ignore") as handle:
+            for line in handle:
+                try:
+                    stamp = json.loads(line).get("timestamp")
+                except json.JSONDecodeError:
+                    continue
+                if not isinstance(stamp, (int, float)):
+                    continue
+                seconds = stamp / 1000 if stamp > 1e11 else stamp
+                counts[datetime.fromtimestamp(seconds, zone).date().isoformat()] += 1
+    except OSError:
+        return {}
+    return dict(counts)
+
+
+def merge_backfill(daily: dict[str, dict[str, Any]], summary: dict[str, Any],
+                   stats: dict[str, Any], prompts: dict[str, int]) -> tuple[dict, dict]:
+    """把回填数据并进日账本与汇总。
+
+    transcript 永远优先：它有 input/output/cache 拆分，聚合缓存没有。回填只填
+    transcript 完全没有覆盖的日子，并打上 estimated 标记，免得把粗粒度数字
+    当成精确数字读。
+    """
+    added = 0
+    for day, by_model in sorted(stats.get("tokens", {}).items()):
+        row = daily.get(day)
+        # 判断依据是「这天有没有 claude-code 的 transcript」，而不是「这天有没有记录」。
+        # 早期很多天只有 Codex 记录，按整天判断会把 Claude 的部分整块漏掉。
+        if row is not None and "claude-code" in row["sources"]:
+            continue
+        total = sum(by_model.values())
+        if total <= 0:
+            continue
+        if row is None:
+            daily[day] = {
+                "date": day, "sources": {"claude-code": total},
+                "models": dict(sorted(by_model.items())),
+                "sessions": stats.get("sessions", {}).get(day, 0), "turns": 0,
+                "input_tokens": 0, "output_tokens": 0, "cache_read_tokens": 0,
+                "cache_write_tokens": 0, "total_tokens": total,
+                # 该日来自聚合缓存，只有 token 总数，没有 input/output/cache 分项
+                "estimated": True,
+            }
+        else:
+            row["sources"]["claude-code"] = total
+            row["sources"] = dict(sorted(row["sources"].items()))
+            for model, value in by_model.items():
+                row["models"][model] = row["models"].get(model, 0) + value
+            row["models"] = dict(sorted(row["models"].items()))
+            row["sessions"] += stats.get("sessions", {}).get(day, 0)
+            row["total_tokens"] += total
+            row["estimated"] = True
+        added += 1
+
+    ordered = {day: daily[day] for day in sorted(daily)}
+    for key in ("total_tokens", "input_tokens", "output_tokens",
+                "cache_read_tokens", "cache_write_tokens"):
+        summary[key] = sum(row[key] for row in ordered.values())
+    summary["active_days"] = len(ordered)
+    summary["sessions"] = sum(row["sessions"] for row in ordered.values())
+    summary["turns"] = sum(row["turns"] for row in ordered.values())
+    summary["first_date"] = next(iter(ordered), None)
+    summary["last_date"] = next(reversed(ordered), None)
+
+    models: Counter[str] = Counter()
+    sources: Counter[str] = Counter()
+    for row in ordered.values():
+        models.update(row["models"])
+        sources.update(row["sources"])
+    summary["top_models"] = models.most_common(8)
+    summary["sources"] = dict(sources)
+
+    summary["backfilled_days"] = added
+    # Claude 的终身累计（stats-cache 的 modelUsage）没有日期维度，无法进热力图，
+    # 只作为参考留在 profile.json 里；卡片一律用有日期的口径，保持前后一致。
+    summary["claude_lifetime_tokens"] = stats.get("lifetime_tokens", 0)
+    summary["prompt_calendar"] = dict(sorted(prompts.items()))
+    summary["prompt_total"] = sum(prompts.values())
+    summary["prompt_first"] = next(iter(summary["prompt_calendar"]), None)
+    return ordered, summary
+
+
 def write_ledger(config: Config, daily: dict[str, dict[str, Any]]) -> None:
     config.daily_ledger.parent.mkdir(parents=True, exist_ok=True)
     with config.daily_ledger.open("w", encoding="utf-8") as handle:
@@ -361,6 +502,7 @@ GALLERY_END = "<!-- profile:gallery:end -->"
 GALLERY_ROWS: tuple[tuple[str, ...], ...] = (
     ("hero",),
     ("heatmap",),
+    ("calendar",),
     ("stats", "models"),
     ("clock", "weekdays"),
     ("trend",),
@@ -370,6 +512,7 @@ GALLERY_ROWS: tuple[tuple[str, ...], ...] = (
 CARD_ALT = {
     "hero": "AI coding profile summary",
     "heatmap": "Daily activity heatmap",
+    "calendar": "Prompt calendar",
     "stats": "Token split by tool",
     "models": "Top models by usage",
     "clock": "Hourly coding rhythm",
@@ -460,9 +603,13 @@ def run_update(config: Config) -> None:
     changed = update_cache(config)
     events = read_events(config)
     daily, summary = aggregate(events)
+    daily, summary = merge_backfill(
+        daily, summary, read_stats_cache(config), read_prompt_calendar(config)
+    )
     write_ledger(config, daily)
     write_outputs(config, daily, summary)
-    print(json.dumps({"changed_files": changed, **summary}, ensure_ascii=False, indent=2))
+    report = {k: v for k, v in summary.items() if k != "prompt_calendar"}
+    print(json.dumps({"changed_files": changed, **report}, ensure_ascii=False, indent=2))
 
 
 def run_validate(config: Config) -> None:
