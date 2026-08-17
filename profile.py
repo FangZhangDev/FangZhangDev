@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import glob
 import hashlib
 import html
@@ -57,6 +58,7 @@ class Config:
     repo: str
     branch: str
     asset_cdn: str
+    asset_ref: str  # 覆盖 branch 的不可变引用，通常是 commit SHA
     claude_glob: str
     codex_homes: tuple[str, ...]
     claude_stats_cache: str
@@ -85,6 +87,7 @@ def load_config(path: Path) -> Config:
         repo=str(profile.get("repo", "")),
         branch=str(profile.get("branch", "main")),
         asset_cdn=str(profile.get("asset_cdn", "jsdelivr")),
+        asset_ref="",  # 只由 `profile.py pin --ref <sha>` 设置，不写进配置文件
         claude_glob=str(paths.get("claude_glob", "")),
         codex_homes=tuple(str(item) for item in paths.get("codex_homes", [])),
         claude_stats_cache=str(paths.get("claude_stats_cache", "")),
@@ -637,6 +640,12 @@ CARD_ALT = {
 def asset_url(config: Config, name: str, digest: str) -> str:
     """卡片地址。配了 repo 就用绝对地址，否则退回仓库内相对路径。
 
+    asset_ref 给定时用它代替分支名（发布脚本会传刚提交的 commit SHA）。这一步是
+    必要的而不是优化：jsDelivr 的 @branch 地址会在边缘缓存 12 小时，**并且忽略
+    查询串**，所以 ?v=<digest> 对它不起作用；实测 push 之后 purge 都报 finished，
+    仍有多个边缘节点在发上一版的文件。@<sha> 则是不可变资源，回源立刻就是对的，
+    而且带 max-age=31536000, immutable —— 既不用 purge，缓存还从 7 天变成一年。
+
     asset_cdn 决定用哪个源，这直接影响读者能不能看到图：
 
     - "jsdelivr"（默认）：走 cdn.jsdelivr.net。GitHub 只代理第三方域名的图，所以
@@ -652,10 +661,11 @@ def asset_url(config: Config, name: str, digest: str) -> str:
     if not config.repo:
         return f"./{config.output_dir.as_posix()}/{name}.svg"
     path = f"{config.output_dir.as_posix()}/{name}.svg"
+    ref = config.asset_ref or config.branch
     if config.asset_cdn == "raw":
-        base = f"https://raw.githubusercontent.com/{config.repo}/{config.branch}"
+        base = f"https://raw.githubusercontent.com/{config.repo}/{ref}"
     else:
-        base = f"https://cdn.jsdelivr.net/gh/{config.repo}@{config.branch}"
+        base = f"https://cdn.jsdelivr.net/gh/{config.repo}@{ref}"
     return f"{base}/{path}?v={digest}"
 
 
@@ -808,6 +818,32 @@ def run_update(config: Config) -> None:
     ))
 
 
+def run_pin(config: Config, ref: str) -> None:
+    """把 README 里的图片地址钉到某个 commit SHA 上，只改 README，不碰 dist/。
+
+    发布流程是两步：先提交 dist/（得到 SHA），再用这个命令把 README 指向那个
+    SHA、单独提交。不能重跑 update 来做这件事 —— update 会重新生成卡片，而 token
+    和提示数一直在涨，重跑出来的图和已经提交的那份就对不上了。
+
+    摘要直接从磁盘上已提交的 SVG 算，保证和 dist/ 里的字节完全一致。
+    """
+    digests: dict[str, str] = {}
+    for path in sorted(config.output_dir.glob("*.svg")):
+        if path.stem == "profile":  # 兼容用的别名，不出现在图集里
+            continue
+        digests[path.stem] = hashlib.sha256(
+            path.read_bytes()
+        ).hexdigest()[:8]
+    if not digests:
+        raise SystemExit(f"No cards in {config.output_dir}; run update first")
+
+    payload = json.loads((config.output_dir / "profile.json").read_text(encoding="utf-8"))
+    pinned = dataclasses.replace(config, asset_ref=ref)
+    changed = update_readme(pinned, gallery_markdown(pinned, digests, payload["summary"]))
+    print(json.dumps({"pinned_ref": ref, "cards": len(digests), "readme_updated": changed},
+                     ensure_ascii=False, indent=2))
+
+
 def run_validate(config: Config) -> None:
     events = read_events(config)
     _, summary = aggregate(events)
@@ -818,12 +854,18 @@ def run_validate(config: Config) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("update", "validate"))
+    parser.add_argument("command", choices=("update", "validate", "pin"))
     parser.add_argument("--config", type=Path, default=Path("config.toml"))
+    parser.add_argument("--ref", default="",
+                        help="pin 用：把 README 的图片地址钉到这个 commit SHA")
     args = parser.parse_args()
     config = load_config(args.config)
     if args.command == "update":
         run_update(config)
+    elif args.command == "pin":
+        if not args.ref:
+            raise SystemExit("pin requires --ref <commit-sha>")
+        run_pin(config, args.ref)
     else:
         run_validate(config)
 

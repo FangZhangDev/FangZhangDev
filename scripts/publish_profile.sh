@@ -15,28 +15,23 @@ if git diff --cached --quiet; then
   exit 0
 fi
 
+# 第一步：先把卡片本身提交，拿到一个确定包含这批 SVG 的 commit。
 git commit -m "chore: update coding activity profile"
-git push
+CARDS_SHA="$(git rev-parse HEAD)"
 
-# jsDelivr 的 @main 地址有 12 小时边缘缓存，且【会忽略查询串】——README 里的
-# ?v=<digest> 对它不起 cache-bust 作用（实测：push 完再取仍是旧文件）。所以推送后
-# 必须显式 purge，否则 profile 页最长半天还在显示上一版的图。
-# asset_cdn = "raw" 时 README 里没有 jsdelivr 地址，下面的循环自然什么都不做。
-paths="$(grep -oE 'https://cdn\.jsdelivr\.net/gh/[^"?]+' README.md \
-         | sed 's|https://cdn\.jsdelivr\.net||' | sort -u)"
-
-if [ -n "${paths}" ]; then
-  count="$(printf '%s\n' "${paths}" | wc -l | tr -d ' ')"
-  echo "Purging ${count} jsDelivr path(s)…"
-  # 官方批量接口：POST / 带 {"path": [...]}。逐个 GET 也行，但容易触发限流。
-  body="$(printf '%s\n' "${paths}" \
-          | sed 's/.*/"&"/' | paste -sd, - \
-          | sed 's/^/{"path":[/; s/$/]}/')"
-  if curl -fsS -X POST https://purge.jsdelivr.net/ \
-       -H 'Content-Type: application/json' -d "${body}" -o /dev/null; then
-    echo "jsDelivr purge requested."
-  else
-    # purge 失败不该让整次发布算失败：图最终仍会在 12 小时内自动刷新
-    echo "WARN: jsDelivr purge failed; cards may serve stale copies for up to 12h." >&2
-  fi
+# 第二步：把 README 的图片地址钉到那个 SHA 上，单独再提交一次。
+#
+# 为什么非要钉 SHA：jsDelivr 的 @branch 地址在边缘缓存 12 小时，而且忽略查询串，
+# 所以 README 里的 ?v=<digest> 对它不起作用 —— 实测 push 完再 purge，接口报
+# finished，仍有多个边缘节点在发上一版的文件。@<sha> 是不可变资源，回源立刻就是
+# 对的，缓存头还是 max-age=31536000, immutable（一年），根本不需要 purge。
+#
+# 注意这里不能用 git commit --amend：amend 会改写 SHA，README 就会指向一个不存在
+# 的 commit。必须是第二个 commit，第一个留在历史里给 jsDelivr 取。
+if "${PYTHON_BIN}" profile.py pin --config config.toml --ref "${CARDS_SHA}"; then
+  git add README.md
+  git diff --cached --quiet || git commit -m "chore: pin card URLs to ${CARDS_SHA:0:8}"
 fi
+
+git push
+echo "Published. Cards live at commit ${CARDS_SHA:0:8}."
