@@ -56,6 +56,7 @@ class Config:
     window_days: int
     repo: str
     branch: str
+    asset_cdn: str
     claude_glob: str
     codex_homes: tuple[str, ...]
     claude_stats_cache: str
@@ -82,6 +83,7 @@ def load_config(path: Path) -> Config:
         window_days=int(profile.get("window_days", 365)),
         repo=str(profile.get("repo", "")),
         branch=str(profile.get("branch", "main")),
+        asset_cdn=str(profile.get("asset_cdn", "jsdelivr")),
         claude_glob=str(paths.get("claude_glob", "")),
         codex_homes=tuple(str(item) for item in paths.get("codex_homes", [])),
         claude_stats_cache=str(paths.get("claude_stats_cache", "")),
@@ -573,14 +575,28 @@ CARD_ALT = {
 
 
 def asset_url(config: Config, name: str, digest: str) -> str:
-    """卡片地址。配了 repo 就用 raw 绝对地址，否则退回仓库内相对路径。
+    """卡片地址。配了 repo 就用绝对地址，否则退回仓库内相对路径。
 
-    带上内容摘要做 cache-bust，让 GitHub 的 camo 代理在图变了之后立刻取新图。
+    asset_cdn 决定用哪个源，这直接影响读者能不能看到图：
+
+    - "jsdelivr"（默认）：走 cdn.jsdelivr.net。GitHub 只代理第三方域名的图，所以
+      这个地址会被改写成 camo.githubusercontent.com，浏览器拿到的缓存是
+      max-age=691200（8 天）。图成功加载一次就能管一周多。
+    - "raw"：走 raw.githubusercontent.com。GitHub 认得这是自家域名，原样放行、
+      不经 camo，浏览器直连；而且 raw 只给 max-age=300（5 分钟），等于每隔
+      5 分钟就要重新撞一次这个域名。网络不稳时图会时有时无。
+
+    两者都带内容摘要做 cache-bust：图变了地址就变，camo 和 jsDelivr 的边缘缓存
+    都会当成新资源重新回源，不会卡着旧图。
     """
-    if config.repo:
+    if not config.repo:
+        return f"./{config.output_dir.as_posix()}/{name}.svg"
+    path = f"{config.output_dir.as_posix()}/{name}.svg"
+    if config.asset_cdn == "raw":
         base = f"https://raw.githubusercontent.com/{config.repo}/{config.branch}"
-        return f"{base}/{config.output_dir.as_posix()}/{name}.svg?v={digest}"
-    return f"./{config.output_dir.as_posix()}/{name}.svg"
+    else:
+        base = f"https://cdn.jsdelivr.net/gh/{config.repo}@{config.branch}"
+    return f"{base}/{path}?v={digest}"
 
 
 def picture(config: Config, card: str, digests: dict[str, str], alt: str, width: int) -> str:

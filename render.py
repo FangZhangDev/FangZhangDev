@@ -8,7 +8,10 @@ Less/More 图例都跟随 GitHub Primer，免得看起来像外来物。但色�
 渲染约束（GitHub 通过 <img> + camo 代理渲染 SVG）：
 - 不执行 JavaScript，不加载外部字体，只能用系统字体栈；
 - <title> 提示框不生效，所有信息必须画在图上；
-- CSS 动画可用，但必须保证「动画不被支持时仍显示最终状态」；
+- 不做入场动画：卡片会被反复滚动到，每次重放淡入只会碍事，且 GitHub 的 camo
+  代理下动画时机本就不可控。唯一的动态是终端卡光标，且尊重 prefers-reduced-motion；
+- 等宽字体在各平台字宽不同（SF Mono 0.6em / Consolas 0.55em），所以占比条一律
+  用 <rect> 画，绝不用 █░ 字符拼——字符条在 Windows 上会错位；
 - 亮/暗主题靠生成两份文件 + README 里的 <picture> 切换，比 SVG 内媒体查询可靠。
 """
 
@@ -160,7 +163,12 @@ def clip(text: str, limit: int) -> str:
 
 
 def base_style(theme: Theme) -> str:
-    """共用排版与动画。字号跟随 GitHub：正文 14px，辅助 12px，刻度 10px。"""
+    """共用排版。字号跟随 GitHub：正文 14px，辅助 12px，刻度 10px。
+
+    卡片不做入场动画：这些图会被嵌进 README 和报告里反复浏览，每次滚动到都重放
+    一遍淡入/拉伸只会碍事。唯一保留的动态是终端卡的光标闪烁，且在系统开启
+    prefers-reduced-motion 时也会停下。
+    """
     return (
         "<style>"
         f"text{{font-family:{FONT}}}"
@@ -172,17 +180,9 @@ def base_style(theme: Theme) -> str:
         f".num{{font-size:22px;font-weight:600;fill:{theme.fg}}}"
         f".num-s{{font-size:15px;font-weight:600;fill:{theme.fg}}}"
         f".lab{{font-size:11px;fill:{theme.muted}}}"
-        "@keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}"
-        "@keyframes po{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:none}}"
-        "@keyframes gw{from{transform:scaleX(0)}to{transform:scaleX(1)}}"
-        "@keyframes fi{from{opacity:0}to{opacity:1}}"
         "@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}"
-        ".fu{animation:fu .5s cubic-bezier(.22,1,.36,1) both}"
-        ".po{animation:po .4s cubic-bezier(.22,1,.36,1) both;transform-box:fill-box;transform-origin:center}"
-        ".gw{animation:gw .8s cubic-bezier(.22,1,.36,1) both;transform-box:fill-box;transform-origin:left center}"
-        # 只淡入的容器动画：元素自身的 opacity 属性得以保留，两者相乘
-        ".fi{animation:fi .45s ease-out both}"
         ".cur{animation:blink 1.1s step-end infinite}"
+        "@media (prefers-reduced-motion:reduce){.cur{animation:none}}"
         "</style>"
     )
 
@@ -253,13 +253,7 @@ def grid_block(values: Sequence[int], start: date, end_date: date, uid: str,
     left = max(44, round((width - grid_width) / 2))
     levels = intensity_levels(values)
 
-    # 逐列的入场延迟收进 CSS 类，避免每个方格都带一段 inline style
-    delays = "".join(
-        f".{uid}d{column}{{animation-delay:{.1 + column * .008:.3f}s}}"
-        for column in range(columns)
-    )
     parts = [
-        f"<style>{delays}</style>"
         f'<defs><rect id="{uid}c" width="{CELL}" height="{CELL}" rx="{RADIUS}"/></defs>'
     ]
 
@@ -299,7 +293,7 @@ def grid_block(values: Sequence[int], start: date, end_date: date, uid: str,
     for index, value in enumerate(values):
         column, row = index // 7, index % 7
         parts.append(
-            f'<use class="po {uid}d{column}" href="#{uid}c" x="{left + column * PITCH}" '
+            f'<use href="#{uid}c" x="{left + column * PITCH}" '
             f'y="{top + row * PITCH}" fill="{ramp[levels.get(value, 0)]}"/>'
         )
     return "".join(parts), left, left + grid_width
@@ -336,11 +330,11 @@ def card_heatmap(daily: dict[str, dict[str, Any]], end_date: date, window_days: 
            frame(width, height, theme)]
     label = f"{esc(source)} · " if source else ""
     out.append(
-        f'<text class="h fu" x="16" y="30">{label}{esc(compact(total))} tokens '
+        f'<text class="h" x="16" y="30">{label}{esc(compact(total))} tokens '
         f'in the last year</text>'
     )
     out.append(
-        f'<text class="sub fu" x="{width - 16}" y="30" text-anchor="end">'
+        f'<text class="sub" x="{width - 16}" y="30" text-anchor="end">'
         f'{active} active days · peak {esc(compact(max(values) if values else 0))}/day</text>'
     )
 
@@ -384,11 +378,11 @@ def card_calendar(summary: dict[str, Any], end_date: date, theme: Theme) -> str:
     out = [open_svg(width, height, "Prompt calendar"), base_style(theme),
            frame(width, height, theme)]
     out.append(
-        f'<text class="h fu" x="16" y="30">{sum(calendar.values()):,} prompts '
+        f'<text class="h" x="16" y="30">{sum(calendar.values()):,} prompts '
         f'since {esc(min(calendar))}</text>'
     )
     out.append(
-        f'<text class="sub fu" x="{width - 16}" y="30" text-anchor="end">'
+        f'<text class="sub" x="{width - 16}" y="30" text-anchor="end">'
         f'{esc(scope)} · {active} active days</text>'
     )
 
@@ -413,7 +407,7 @@ def card_models(summary: dict[str, Any], theme: Theme, source: str | None = None
     out = [open_svg(width, height, "Top models"), base_style(theme),
            frame(width, height, theme)]
     heading = f"Models · {source}" if source else "Models used"
-    out.append(f'<text class="h fu" x="16" y="30">{esc(heading)}</text>')
+    out.append(f'<text class="h" x="16" y="30">{esc(heading)}</text>')
     out.append(divider(width, 44, theme))
 
     if source:
@@ -426,7 +420,8 @@ def card_models(summary: dict[str, Any], theme: Theme, source: str | None = None
         out.append(f'<text class="sub" x="16" y="72">No model data yet</text>')
         return "".join(out) + "</svg>"
 
-    peak = max(value for _, value in models)
+    # 条长和标签用同一个分母（全部模型的 token 总和），否则第一名总是画满，
+    # 和它旁边写的 36% 对不上，读者只能猜条代表什么。
     grand = sum(value for _, value in ranked) or 1
     top, row_height, bar_left = 68, 27, 16
     bar_width = width - 32
@@ -434,24 +429,23 @@ def card_models(summary: dict[str, Any], theme: Theme, source: str | None = None
 
     for index, (name, value) in enumerate(models):
         y = top + index * row_height
-        length = max(3.0, bar_width * value / peak)
+        length = max(2.0, bar_width * value / grand)
         out.append(
-            f'<g class="fu" style="animation-delay:{.08 + index * .05:.2f}s">'
+            f'<g>'
             f'<text class="lab" x="{bar_left}" y="{y}" fill="{theme.fg}">'
             f'{esc(clip(name, 22))}</text>'
             f'<text class="lab" x="{bar_left + bar_width}" y="{y}" text-anchor="end">'
             f'{esc(compact(value))} · {value / grand * 100:.0f}%</text>'
             f'<rect x="{bar_left}" y="{y + 5}" width="{bar_width}" height="6" rx="3" '
             f'fill="{theme.subtle}"/>'
-            f'<rect class="gw" style="animation-delay:{.12 + index * .06:.2f}s" '
-            f'x="{bar_left}" y="{y + 5}" width="{length:.1f}" height="6" rx="3" '
+            f'<rect x="{bar_left}" y="{y + 5}" width="{length:.1f}" height="6" rx="3" '
             f'fill="{bars[index]}"/></g>'
         )
 
     out.append(divider(width, height - 30, theme))
     out.append(
         f'<text class="foot" x="16" y="{height - 12}">'
-        f'{len(ranked)} distinct models across all sessions</text>'
+        f'{len(ranked)} distinct models · bar length = share of all model tokens</text>'
     )
     return "".join(out) + "</svg>"
 
@@ -461,24 +455,29 @@ def card_models(summary: dict[str, Any], theme: Theme, source: str | None = None
 
 def card_terminal(summary: dict[str, Any], theme: Theme, title: str) -> str:
     """终端风格总览。主页现在只靠这张卡承载 token 口径，所以原「工具占比」卡
-    （含 cached/output 拆分）和「模型榜」卡的信息都搬了进来，图形条换成字符条，
-    保持终端的观感。
+    （含 cached/output 拆分）和「模型榜」卡的信息都搬了进来。
+
+    占比条画成 <rect> 而不是 █░ 字符：字符条的长度取决于浏览器实际选中的等宽
+    字体，Mac 命中 SF Mono（字宽 0.6em）、Windows 命中 Consolas（0.55em），
+    24 格累积下来差十几个像素；Windows 还会把 █ 和 ░ 分成两个 shaping run 各自
+    做像素对齐，接缝处肉眼可见地错开。rect 的长度由代码算，和字体无关。
     """
-    char = 7.35  # 12.5px 等宽字体的近似字宽，用于列对齐
+    char = 7.35  # 12.5px 等宽字体的近似字宽，只用于文字列的起始位置
     left, top, line_height = 22, 62, 20
     width = CARD_WIDTH
-    bar_cols = 24  # 字符条的格数，工具条和模型条同宽便于横向比较
+    # 占比条的横向区间：从第 44 列起，一直铺到和左边距对称的右边距
+    bar_x = left + 44 * char
+    bar_width = width - left - bar_x
 
     tools = sorted(summary.get("sources", {}))
     sources = sorted(summary.get("sources", {}).items(), key=lambda item: -item[1])
     grand = sum(value for _, value in sources) or 1
     models = list(summary.get("top_models", []))[:6]
     model_grand = sum(value for _, value in summary.get("top_models", [])) or 1
-    model_peak = max((value for _, value in models), default=0) or 1
 
-    def bar(fraction: float) -> str:
-        filled = max(1, round(fraction * bar_cols))
-        return "█" * filled + "░" * (bar_cols - filled)
+    # 行号 -> (占比, 颜色)。两组条都以「占各自总量的比例」为长度，和同一行写的
+    # 百分比是同一个数，避免出现「36% 却画满格」这种要靠猜的读法。
+    bars: dict[int, tuple[float, str]] = {}
 
     lines: list[list[tuple[float, str, str]]] = [
         [(0, "$", theme.accents[0]), (2, "profile stats --since ", theme.fg),
@@ -498,21 +497,21 @@ def card_terminal(summary: dict[str, Any], theme: Theme, title: str) -> str:
     ]
     # 工具条用它在分工具热力图里的同一色相，读者在折叠区看到的是同一种颜色
     for name, value in sources[:3]:
+        bars[len(lines)] = (value / grand, tool_ramp(name, tools, theme)[4])
         lines.append([
             (2, clip(name, 16), theme.muted),
             (22, compact(value), theme.fg),
             (34, f"{value / grand * 100:5.1f}%", theme.faint),
-            (44, bar(value / grand), tool_ramp(name, tools, theme)[4]),
         ])
     lines.append([])
     lines.append([(2, "# top models", theme.faint)])
     model_bars = rank_colors(theme, max(len(models), 1))
     for index, (name, value) in enumerate(models):
+        bars[len(lines)] = (value / model_grand, model_bars[index])
         lines.append([
             (2, clip(name, 18), theme.muted),
             (22, compact(value), theme.fg),
             (34, f"{value / model_grand * 100:5.1f}%", theme.faint),
-            (44, bar(value / model_peak), model_bars[index]),
         ])
     if not models:
         lines.append([(2, "no model data yet", theme.faint)])
@@ -544,9 +543,19 @@ def card_terminal(summary: dict[str, Any], theme: Theme, title: str) -> str:
             for column, text, color in segments
         )
         out.append(
-            f'<text class="mono fu" style="animation-delay:{.05 + index * .04:.2f}s" '
-            f'y="{y}" font-size="12.5" xml:space="preserve">{spans}</text>'
+            f'<text class="mono" y="{y}" font-size="12.5" '
+            f'xml:space="preserve">{spans}</text>'
         )
+        if index in bars:
+            fraction, color = bars[index]
+            # 极小的占比也留 2px，否则 0.9% 这一行看上去像是没画条
+            length = max(2.0, bar_width * fraction)
+            out.append(
+                f'<rect x="{bar_x:.1f}" y="{y - 8}" width="{bar_width:.1f}" height="7" '
+                f'rx="3.5" fill="{theme.subtle}"/>'
+                f'<rect x="{bar_x:.1f}" y="{y - 8}" width="{length:.1f}" height="7" '
+                f'rx="3.5" fill="{color}"/>'
+            )
     cursor_y = top + (len(lines) - 1) * line_height
     out.append(
         f'<rect class="cur" x="{left + 2 * char:.1f}" y="{cursor_y - 10}" width="8" '
