@@ -7,8 +7,9 @@ cd "${ROOT_DIR}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 "${PYTHON_BIN}" profile.py update --config config.toml
 
-# dist/*.html 已在 .gitignore 中排除，这里可以整目录 add
-git add data/daily.jsonl dist README.md docs
+# dist/*.html 和 data/*.sqlite 都在 .gitignore 里，这里可以整目录 add。
+# data/ 整个进来是有意的：两份账本都是只增不减的长期归档，必须进版本库。
+git add data dist README.md docs
 if git diff --cached --quiet; then
   echo "No profile changes to publish."
   exit 0

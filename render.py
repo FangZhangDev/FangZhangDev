@@ -500,23 +500,24 @@ def card_models(summary: dict[str, Any], theme: Theme, source: str | None = None
     # 和它旁边写的 36% 对不上，读者只能猜条代表什么。
     grand = sum(value for _, value in ranked) or 1
     top, row_height, bar_left = 68, 27, 16
-    # 格宽和终端卡保持一致（7.35px），格数取铺满卡片所需的数量，这样两张卡的
-    # 点阵疏密看起来是同一种材质，只是条的长短不同
-    cols = int((width - 32) / BAR_CELL)
+    bar_width = width - 32
     bars = rank_colors(theme, len(models))
 
+    # 这里用干净的圆角条，不用终端卡那种点阵条：█░ 的颗粒感是终端的语言，
+    # 放到图表卡上只是噪点。同一份数据在两处各说各的话，反而更清楚。
     for index, (name, value) in enumerate(models):
         y = top + index * row_height
+        length = max(2.0, bar_width * value / grand)
         out.append(
             f'<text class="lab" x="{bar_left}" y="{y}" fill="{theme.fg}">'
             f'{esc(clip(name, 22))}</text>'
-            f'<text class="lab" x="{bar_left + cols * BAR_CELL:.0f}" y="{y}" '
-            f'text-anchor="end">'
+            f'<text class="lab" x="{bar_left + bar_width}" y="{y}" text-anchor="end">'
             f'{esc(compact(value))} · {value / grand * 100:.0f}%</text>'
+            f'<rect x="{bar_left}" y="{y + 5}" width="{bar_width}" height="6" rx="3" '
+            f'fill="{theme.subtle}"/>'
+            f'<rect x="{bar_left}" y="{y + 5}" width="{length:.1f}" height="6" rx="3" '
+            f'fill="{bars[index]}"/>'
         )
-        out.append(meter(f"m{theme.name}{source or 'all'}{index}".replace("-", ""),
-                         bar_left, y + 4, value / grand, bars[index], theme.faint,
-                         cols=cols, height=9))
 
     out.append(divider(width, height - 30, theme))
     out.append(

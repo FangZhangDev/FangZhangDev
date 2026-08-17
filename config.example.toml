@@ -32,6 +32,9 @@ prompt_histories = [
   { source = "codex", glob = "~/.local/state/agent-config/codex/*/history.jsonl" },
 ]
 cache_db = "data/profile.sqlite"
+# 两份账本都只增不减，是这个项目唯一的长期归档：会话记录会被 cleanupPeriodDays
+# 清掉、提示历史会被各工具自己裁剪，账本记下来的日子一律保留
 daily_ledger = "data/daily.jsonl"
+prompt_ledger = "data/prompts.jsonl"
 output_dir = "dist"
 readme = "README.md"

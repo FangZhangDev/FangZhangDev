@@ -50,8 +50,9 @@ claude_glob  = "~/.claude/projects/**/*.jsonl"
 codex_homes  = ["~/.codex", "~/.local/state/agent-config/codex/*"]
 claude_stats_cache = "~/.claude/stats-cache.json"   # backfill, see below
 claude_history     = "~/.claude/history.jsonl"      # prompt calendar
-cache_db     = "data/profile.sqlite"   # local only, git-ignored
-daily_ledger = "data/daily.jsonl"      # public
+cache_db      = "data/profile.sqlite"  # local only, git-ignored
+daily_ledger  = "data/daily.jsonl"     # public, append-only
+prompt_ledger = "data/prompts.jsonl"   # public, append-only
 output_dir   = "dist"                  # public
 readme       = "README.md"             # gallery block gets rewritten in place
 ```
@@ -177,6 +178,24 @@ a month after it happened. Two files survive that cleanup and are read as a fall
 | `stats-cache.json` → `dailyActivity` | since `firstSessionDate` | no, sessions and messages only |
 | `stats-cache.json` → `modelUsage` | all time | yes, but **undated** |
 | `history.jsonl` (one per tool) | longest of all | no, prompt timestamps only |
+
+### The two ledgers
+
+Every source above belongs to some other tool, and every one of them is pruned on somebody
+else's schedule. So neither ledger is ever rewritten from scratch — a day that has been recorded
+stays recorded:
+
+| Ledger | Written by | Guarantee |
+| --- | --- | --- |
+| `data/daily.jsonl` | `write_ledger` | a day is overwritten only when that day has new data |
+| `data/prompts.jsonl` | `merge_prompt_ledger` | per day **and per tool**, keeps `max(archived, live)` |
+
+`prompts.jsonl` matters because the prompt calendar has no other archive: `read_prompt_calendar`
+re-reads each tool's `history.jsonl` on every run, and before this ledger existed the result only
+ever landed in `dist/profile.json`, which the code never reads back. A trimmed history file, or a
+move to a new machine, would silently shorten the calendar — and show up in git as a deletion.
+The per-tool `max` handles the case where a history file is a ring buffer and a later read returns
+only its tail.
 
 Merge rules, in `merge_backfill`:
 

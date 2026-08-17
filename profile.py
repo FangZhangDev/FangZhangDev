@@ -63,6 +63,7 @@ class Config:
     prompt_histories: tuple[tuple[str, str], ...]
     cache_db: Path
     daily_ledger: Path
+    prompt_ledger: Path
     output_dir: Path
     readme: Path
 
@@ -94,6 +95,7 @@ def load_config(path: Path) -> Config:
         ),
         cache_db=Path(paths.get("cache_db", "data/profile.sqlite")),
         daily_ledger=Path(paths.get("daily_ledger", "data/daily.jsonl")),
+        prompt_ledger=Path(paths.get("prompt_ledger", "data/prompts.jsonl")),
         output_dir=Path(paths.get("output_dir", "dist")),
         readme=Path(paths.get("readme", "README.md")),
     )
@@ -402,6 +404,64 @@ def read_stats_cache(config: Config) -> dict[str, Any]:
             )
     return {"tokens": tokens, "sessions": activity, "lifetime_tokens": lifetime,
             "first_session": str(raw.get("firstSessionDate") or "")[:10]}
+
+
+def merge_prompt_ledger(config: Config,
+                        live: dict[str, dict[str, int]]) -> tuple[dict[str, dict[str, int]], int]:
+    """把现读到的提示日历并进账本，返回 (合并结果, 仅存在于旧账本的天数)。
+
+    和 token 账本一样只增不减，理由也一样：提示历史文件是各工具自己在维护的，
+    会被裁剪、会随家目录一起换机器。之前这份日历每次都从 history.jsonl 现读、
+    结果只写进 dist/profile.json 而从不读回来，源文件一旦被裁，日历就会静默变短，
+    并且在 git 里表现为删除 —— 已经记下来的日子不该这样消失。
+
+    合并粒度是「日 × 工具」：同一天同一个工具有新数字才覆盖，否则保留旧值。取
+    max 而不是直接覆盖，是因为某些工具的历史文件是环形缓冲，重读时可能只剩后半段。
+    """
+    archived: dict[str, dict[str, int]] = {}
+    if config.prompt_ledger.exists():
+        with config.prompt_ledger.open(encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                day = str(row.get("date") or "")
+                counts = row.get("sources")
+                if day and isinstance(counts, dict):
+                    archived[day] = {str(k): number(v) for k, v in counts.items()}
+
+    # live 是 {source: {day: count}}，账本按天存 {day: {source: count}}
+    fresh: dict[str, dict[str, int]] = {}
+    for source, by_day in live.items():
+        for day, count in by_day.items():
+            fresh.setdefault(day, {})[source] = count
+
+    merged = {day: dict(counts) for day, counts in archived.items()}
+    for day, counts in fresh.items():
+        row = merged.setdefault(day, {})
+        for source, count in counts.items():
+            row[source] = max(row.get(source, 0), count)
+    retained = sum(1 for day in archived if day not in fresh)
+
+    config.prompt_ledger.parent.mkdir(parents=True, exist_ok=True)
+    with config.prompt_ledger.open("w", encoding="utf-8") as handle:
+        for day in sorted(merged):
+            counts = {k: v for k, v in sorted(merged[day].items()) if v}
+            if counts:
+                handle.write(json.dumps({"date": day, "sources": counts},
+                                        ensure_ascii=False) + "\n")
+
+    # 还原成 read_prompt_calendar 的形状，下游不用改
+    out: dict[str, dict[str, int]] = {}
+    for day, counts in merged.items():
+        for source, count in counts.items():
+            if count:
+                out.setdefault(source, {})[day] = count
+    return out, retained
 
 
 def read_prompt_calendar(config: Config) -> dict[str, dict[str, int]]:
@@ -733,15 +793,17 @@ def run_update(config: Config) -> None:
     changed = update_cache(config)
     events = read_events(config)
     daily, summary = aggregate(events)
+    prompts, prompt_retained = merge_prompt_ledger(config, read_prompt_calendar(config))
     daily, summary = merge_backfill(
-        daily, summary, read_stats_cache(config), read_prompt_calendar(config)
+        daily, summary, read_stats_cache(config), prompts
     )
     retained = write_ledger(config, daily)
     write_outputs(config, daily, summary)
     report = {k: v for k, v in summary.items()
               if k not in ("prompt_calendar", "prompt_calendar_by_source", "models_by_source")}
     print(json.dumps(
-        {"changed_files": changed, "ledger_only_days": retained, **report},
+        {"changed_files": changed, "ledger_only_days": retained,
+         "prompt_ledger_only_days": prompt_retained, **report},
         ensure_ascii=False, indent=2,
     ))
 

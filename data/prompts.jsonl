@@ -1,0 +1,140 @@
+{"date": "2025-09-30", "sources": {"claude-code": 41}}
+{"date": "2025-10-15", "sources": {"claude-code": 10}}
+{"date": "2025-10-16", "sources": {"claude-code": 67}}
+{"date": "2025-10-20", "sources": {"claude-code": 17}}
+{"date": "2025-10-21", "sources": {"claude-code": 60}}
+{"date": "2025-10-22", "sources": {"claude-code": 29}}
+{"date": "2025-10-23", "sources": {"claude-code": 35}}
+{"date": "2025-10-24", "sources": {"claude-code": 54}}
+{"date": "2025-10-27", "sources": {"claude-code": 39}}
+{"date": "2025-10-28", "sources": {"claude-code": 41}}
+{"date": "2025-10-29", "sources": {"claude-code": 10}}
+{"date": "2025-10-30", "sources": {"claude-code": 5}}
+{"date": "2025-11-02", "sources": {"claude-code": 1}}
+{"date": "2025-11-03", "sources": {"claude-code": 43}}
+{"date": "2025-11-05", "sources": {"claude-code": 5}}
+{"date": "2025-11-14", "sources": {"claude-code": 10}}
+{"date": "2025-11-17", "sources": {"claude-code": 20}}
+{"date": "2025-11-19", "sources": {"claude-code": 2}}
+{"date": "2025-11-25", "sources": {"claude-code": 3}}
+{"date": "2025-11-26", "sources": {"claude-code": 2}}
+{"date": "2025-12-02", "sources": {"claude-code": 6}}
+{"date": "2025-12-05", "sources": {"claude-code": 25}}
+{"date": "2025-12-06", "sources": {"claude-code": 1}}
+{"date": "2025-12-07", "sources": {"claude-code": 4}}
+{"date": "2025-12-21", "sources": {"claude-code": 24}}
+{"date": "2025-12-22", "sources": {"claude-code": 1}}
+{"date": "2025-12-26", "sources": {"claude-code": 29}}
+{"date": "2025-12-28", "sources": {"claude-code": 12}}
+{"date": "2025-12-29", "sources": {"claude-code": 16}}
+{"date": "2025-12-30", "sources": {"claude-code": 10}}
+{"date": "2025-12-31", "sources": {"claude-code": 6}}
+{"date": "2026-01-02", "sources": {"claude-code": 10}}
+{"date": "2026-01-05", "sources": {"claude-code": 1}}
+{"date": "2026-01-06", "sources": {"claude-code": 21}}
+{"date": "2026-01-07", "sources": {"claude-code": 2}}
+{"date": "2026-01-09", "sources": {"claude-code": 9}}
+{"date": "2026-01-10", "sources": {"claude-code": 12}}
+{"date": "2026-01-11", "sources": {"claude-code": 3}}
+{"date": "2026-01-12", "sources": {"claude-code": 2}}
+{"date": "2026-01-13", "sources": {"claude-code": 14}}
+{"date": "2026-01-14", "sources": {"claude-code": 8}}
+{"date": "2026-01-15", "sources": {"claude-code": 50}}
+{"date": "2026-01-16", "sources": {"claude-code": 3}}
+{"date": "2026-01-20", "sources": {"claude-code": 12}}
+{"date": "2026-01-21", "sources": {"claude-code": 28}}
+{"date": "2026-01-22", "sources": {"claude-code": 31}}
+{"date": "2026-01-23", "sources": {"claude-code": 24}}
+{"date": "2026-01-25", "sources": {"claude-code": 6}}
+{"date": "2026-01-26", "sources": {"claude-code": 18}}
+{"date": "2026-01-30", "sources": {"claude-code": 5}}
+{"date": "2026-02-05", "sources": {"claude-code": 8}}
+{"date": "2026-02-26", "sources": {"claude-code": 1}}
+{"date": "2026-03-03", "sources": {"claude-code": 4}}
+{"date": "2026-03-04", "sources": {"claude-code": 1}}
+{"date": "2026-03-06", "sources": {"claude-code": 17}}
+{"date": "2026-03-09", "sources": {"claude-code": 1}}
+{"date": "2026-03-12", "sources": {"claude-code": 3}}
+{"date": "2026-03-16", "sources": {"claude-code": 1}}
+{"date": "2026-03-20", "sources": {"claude-code": 24}}
+{"date": "2026-03-23", "sources": {"claude-code": 15}}
+{"date": "2026-03-24", "sources": {"claude-code": 1}}
+{"date": "2026-03-25", "sources": {"claude-code": 1}}
+{"date": "2026-03-31", "sources": {"claude-code": 5}}
+{"date": "2026-04-13", "sources": {"claude-code": 1}}
+{"date": "2026-04-18", "sources": {"claude-code": 2}}
+{"date": "2026-04-21", "sources": {"claude-code": 1}}
+{"date": "2026-05-06", "sources": {"claude-code": 6}}
+{"date": "2026-05-07", "sources": {"claude-code": 20}}
+{"date": "2026-05-08", "sources": {"claude-code": 9}}
+{"date": "2026-05-09", "sources": {"claude-code": 73}}
+{"date": "2026-05-10", "sources": {"claude-code": 11}}
+{"date": "2026-05-11", "sources": {"claude-code": 7}}
+{"date": "2026-05-24", "sources": {"claude-code": 43}}
+{"date": "2026-05-25", "sources": {"claude-code": 13}}
+{"date": "2026-05-26", "sources": {"claude-code": 36}}
+{"date": "2026-05-30", "sources": {"claude-code": 3}}
+{"date": "2026-06-04", "sources": {"claude-code": 27}}
+{"date": "2026-06-05", "sources": {"claude-code": 14}}
+{"date": "2026-06-08", "sources": {"claude-code": 12}}
+{"date": "2026-06-11", "sources": {"claude-code": 4}}
+{"date": "2026-06-12", "sources": {"claude-code": 5, "codex": 20}}
+{"date": "2026-06-14", "sources": {"claude-code": 22}}
+{"date": "2026-06-15", "sources": {"claude-code": 86, "codex": 32}}
+{"date": "2026-06-16", "sources": {"claude-code": 15, "codex": 3}}
+{"date": "2026-06-17", "sources": {"claude-code": 11, "codex": 6}}
+{"date": "2026-06-18", "sources": {"codex": 6}}
+{"date": "2026-06-19", "sources": {"claude-code": 3, "codex": 1}}
+{"date": "2026-06-20", "sources": {"claude-code": 4, "codex": 29}}
+{"date": "2026-06-22", "sources": {"claude-code": 24, "codex": 23}}
+{"date": "2026-06-23", "sources": {"claude-code": 7, "codex": 1}}
+{"date": "2026-06-24", "sources": {"claude-code": 50, "codex": 26}}
+{"date": "2026-06-25", "sources": {"claude-code": 30, "codex": 14}}
+{"date": "2026-06-26", "sources": {"claude-code": 32, "codex": 9}}
+{"date": "2026-06-27", "sources": {"codex": 1}}
+{"date": "2026-06-28", "sources": {"codex": 23}}
+{"date": "2026-06-29", "sources": {"claude-code": 21, "codex": 7}}
+{"date": "2026-06-30", "sources": {"claude-code": 71, "codex": 2}}
+{"date": "2026-07-01", "sources": {"claude-code": 23}}
+{"date": "2026-07-02", "sources": {"claude-code": 8}}
+{"date": "2026-07-03", "sources": {"claude-code": 15, "codex": 8}}
+{"date": "2026-07-04", "sources": {"claude-code": 7, "codex": 2}}
+{"date": "2026-07-05", "sources": {"claude-code": 26, "codex": 11}}
+{"date": "2026-07-06", "sources": {"claude-code": 72}}
+{"date": "2026-07-07", "sources": {"claude-code": 52}}
+{"date": "2026-07-08", "sources": {"claude-code": 84}}
+{"date": "2026-07-10", "sources": {"claude-code": 65, "codex": 4}}
+{"date": "2026-07-11", "sources": {"claude-code": 20, "codex": 3}}
+{"date": "2026-07-12", "sources": {"claude-code": 10}}
+{"date": "2026-07-13", "sources": {"claude-code": 56, "codex": 1}}
+{"date": "2026-07-14", "sources": {"claude-code": 49, "codex": 5}}
+{"date": "2026-07-15", "sources": {"claude-code": 104, "codex": 72}}
+{"date": "2026-07-16", "sources": {"claude-code": 57, "codex": 3}}
+{"date": "2026-07-17", "sources": {"claude-code": 13}}
+{"date": "2026-07-18", "sources": {"claude-code": 6, "codex": 2}}
+{"date": "2026-07-19", "sources": {"claude-code": 1, "codex": 3}}
+{"date": "2026-07-20", "sources": {"claude-code": 43, "codex": 44}}
+{"date": "2026-07-21", "sources": {"claude-code": 14, "codex": 68}}
+{"date": "2026-07-22", "sources": {"claude-code": 5, "codex": 45}}
+{"date": "2026-07-23", "sources": {"claude-code": 9, "codex": 84}}
+{"date": "2026-07-24", "sources": {"claude-code": 68, "codex": 67}}
+{"date": "2026-07-25", "sources": {"claude-code": 62}}
+{"date": "2026-07-26", "sources": {"claude-code": 40, "codex": 55}}
+{"date": "2026-07-27", "sources": {"claude-code": 78, "codex": 36}}
+{"date": "2026-07-28", "sources": {"claude-code": 25, "codex": 13}}
+{"date": "2026-07-29", "sources": {"claude-code": 9, "codex": 17}}
+{"date": "2026-07-30", "sources": {"codex": 8}}
+{"date": "2026-08-02", "sources": {"claude-code": 14, "codex": 10}}
+{"date": "2026-08-03", "sources": {"claude-code": 29, "codex": 16}}
+{"date": "2026-08-04", "sources": {"claude-code": 61, "codex": 30}}
+{"date": "2026-08-05", "sources": {"claude-code": 32, "codex": 8}}
+{"date": "2026-08-06", "sources": {"claude-code": 4}}
+{"date": "2026-08-08", "sources": {"claude-code": 9}}
+{"date": "2026-08-09", "sources": {"claude-code": 15, "codex": 18}}
+{"date": "2026-08-11", "sources": {"claude-code": 4, "codex": 5}}
+{"date": "2026-08-12", "sources": {"claude-code": 5, "codex": 1}}
+{"date": "2026-08-13", "sources": {"claude-code": 32, "codex": 1}}
+{"date": "2026-08-14", "sources": {"claude-code": 141, "codex": 12}}
+{"date": "2026-08-15", "sources": {"claude-code": 52, "codex": 2}}
+{"date": "2026-08-16", "sources": {"claude-code": 18, "codex": 13}}
+{"date": "2026-08-17", "sources": {"claude-code": 47, "codex": 35}}
