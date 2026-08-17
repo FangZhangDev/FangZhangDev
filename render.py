@@ -71,31 +71,36 @@ LIGHT = Theme(
 
 THEMES = (DARK, LIGHT)
 
-# 网格梯度按用途取用，不绑在主题上：一个色相代表一个含义。mauve 是主日历，teal
-# 和 pink 分给两个工具，让分工具视图一眼可辨。绿色留给 GitHub 真正的贡献图。
-# 暗色/亮色分别取 Catppuccin Mocha / Latte 的对应色相，从 GitHub 网格底色向
-# 纯色相插值，保证和贡献图一样的「低强度很淡、高强度饱和」的节奏。
-RAMPS: dict[str, dict[str, tuple[str, str, str, str, str]]] = {
-    "mauve": {
-        "dark": ("#161b22", "#554c6d", "#7a6797", "#9e83c2", "#cba6f7"),
-        "light": ("#ebedf0", "#c8aef0", "#b58aef", "#a166ef", "#8839ef"),
-    },
-    "teal": {
-        "dark": ("#161b22", "#426161", "#5b8884", "#74b0a8", "#94e2d5"),
-        "light": ("#ebedf0", "#a1cdd2", "#76bbc0", "#4ca9af", "#179299"),
-    },
-    "pink": {
-        "dark": ("#161b22", "#645567", "#91778e", "#bd98b6", "#f5c2e7"),
-        "light": ("#ebedf0", "#ebc3e3", "#eaacdc", "#ea94d4", "#ea76cb"),
-    },
+# 网格梯度按用途取用，不绑在主题上：一个色相代表一个含义。mauve 是主日历，其余
+# 按工具名排序依次分给各个工具，让分工具视图一眼可辨。绿色留给 GitHub 真正的
+# 贡献图，不参与分配。色相取 Catppuccin：暗色用 Mocha、亮色用 Latte。
+HUES: dict[str, tuple[str, str]] = {  # 名称 -> (Mocha, Latte)
+    "mauve": ("#cba6f7", "#8839ef"),
+    "teal": ("#94e2d5", "#179299"),
+    "pink": ("#f5c2e7", "#ea76cb"),
+    "blue": ("#89b4fa", "#1e66f5"),
+    "peach": ("#fab387", "#fe640b"),
+    "yellow": ("#f9e2af", "#df8e1d"),
 }
 
+# 网格最低一级用 GitHub 贡献图的空格底色，往上向纯色相插值，节奏和贡献图一致：
+# 低强度很淡、高强度饱和。四个刻度的插值位置照搬 Primer 的观感。
+GRID_BASE = {"dark": "#161b22", "light": "#ebedf0"}
+RAMP_STOPS = (0.35, 0.55, 0.75, 1.0)
+
 PRIMARY_RAMP = "mauve"
-TOOL_RAMPS = ("teal", "pink", "mauve")  # 按工具名排序循环取用
+# 分工具色相的取用顺序。主日历的 mauve 排在最后，这样工具少时不会和它撞色；
+# 工具多到用完一轮会从头循环，六个色相够用很久了。
+TOOL_RAMPS = ("teal", "pink", "blue", "peach", "yellow", "mauve")
 
 
-def ramp_for(name: str, theme: Theme) -> tuple[str, str, str, str, str]:
-    return RAMPS.get(name, RAMPS[PRIMARY_RAMP])[theme.name]
+def ramp_for(name: str, theme: Theme) -> tuple[str, ...]:
+    """按色相名生成五级梯度。改成算出来而不是手写死值，加新色相只要往 HUES 里
+    添一行 —— 每接入一个新 agent 就要多一个可辨认的色相。"""
+    hue = HUES.get(name, HUES[PRIMARY_RAMP])
+    target = hue[0] if theme.name == "dark" else hue[1]
+    base = GRID_BASE[theme.name]
+    return (base,) + tuple(lerp_hex(base, target, stop) for stop in RAMP_STOPS)
 
 
 def tool_ramp(tool: str, tools: Sequence[str], theme: Theme) -> tuple[str, ...]:
@@ -206,6 +211,39 @@ def divider(width: int, y: float, theme: Theme, inset: int = 16) -> str:
     return (
         f'<line x1="{inset}" y1="{y}" x2="{width - inset}" y2="{y}" '
         f'stroke="{theme.border}" stroke-opacity=".7"/>'
+    )
+
+
+# ---------------------------------------------------------------- 占比条
+
+
+# 一个格子的宽度，沿用当初 █░ 字符条在 12.5px 等宽字体下的字宽
+BAR_CELL = 7.35
+BAR_COLS = 24  # 格数也照搬字符条
+BAR_HEIGHT = 11
+
+
+def meter(uid: str, x: float, y: float, fraction: float, color: str, faint: str,
+          cols: int = BAR_COLS, height: float = BAR_HEIGHT) -> str:
+    """█████░░░░░░ 形态的占比条，但用 <rect> + <pattern> 画。
+
+    字符条的长度由浏览器实际选中的等宽字体决定（Mac 命中 SF Mono，字宽 0.6em；
+    Windows 命中 Consolas，0.55em），24 格累积下来差十几像素；Windows 还会把 █ 和
+    ░ 拆成两个 shaping run 各自做像素对齐，接缝处肉眼可见地错开。这里两段都按算
+    出来的坐标画：实心段是一个矩形，点阵段是一个填了 pattern 的矩形，严丝合缝，
+    任何平台上都是同一个像素结果。
+
+    uid 必须在同一份 SVG 内唯一 —— pattern 是靠 id 引用的。
+    """
+    width = cols * BAR_CELL
+    filled = max(1, round(fraction * cols))  # 再小的占比也点亮一格，否则看着像没画
+    lit = width * filled / cols
+    return (
+        f'<defs><pattern id="{uid}" width="3" height="3" patternUnits="userSpaceOnUse">'
+        f'<circle cx="1.5" cy="1.5" r=".75" fill="{faint}"/></pattern></defs>'
+        f'<rect x="{x:.2f}" y="{y}" width="{lit:.2f}" height="{height}" fill="{color}"/>'
+        f'<rect x="{x + lit:.2f}" y="{y}" width="{width - lit:.2f}" '
+        f'height="{height}" fill="url(#{uid})"/>'
     )
 
 
@@ -353,40 +391,78 @@ def card_heatmap(daily: dict[str, dict[str, Any]], end_date: date, window_days: 
 # ---------------------------------------------------------------- 卡片：提示日历
 
 
-def card_calendar(summary: dict[str, Any], end_date: date, theme: Theme) -> str:
+def profile_years(first: date, last: date) -> list[tuple[date, date]]:
+    """把使用历史切成以首个提示日为锚的「档案年」，最早的在前。
+
+    锚点用首个提示日而不是自然年 1 月 1 日：这样第一段一定是满的，不会开局就是
+    半张残缺的格子。每段是 [锚点, 下一个锚点)，跨闰年也正好一年。
+
+    为什么必须切段：网格宽度 = 列数 × 15px，而「从头铺到今天」的列数每周 +1、
+    没有上限，880 宽的卡片撑到第 56 列就画到视口外面去了。按年切之后每段恒定
+    53 列、右边界 836，和 token 热力图一样，永远画得下。
+    """
+    spans: list[tuple[date, date]] = []
+    start = first
+    while start <= last:
+        try:
+            nxt = start.replace(year=start.year + 1)
+        except ValueError:  # 2 月 29 日锚点，退到 2 月 28 日
+            nxt = start.replace(year=start.year + 1, day=28)
+        spans.append((start, min(nxt - timedelta(days=1), last)))
+        start = nxt
+    return spans
+
+
+def calendar_key(start: date) -> str:
+    """往年日历卡的文件名，如 calendar-2025-09。同一锚点每年只会有一张。"""
+    return f"calendar-{start.year}-{start.month:02d}"
+
+
+def card_calendar(summary: dict[str, Any], end_date: date, theme: Theme,
+                  window: tuple[date, date] | None = None) -> str:
     """提示日历。覆盖期比 token 热力图长：会话记录被清理后 token 不可考，
     但提示时间戳留着，所以这张能一路回溯到最早的使用记录。
 
     数的是「你敲了多少条提示」，和哪个模型作答无关 —— 提示历史里没有模型字段。
-    标题必须写清覆盖哪些工具，否则读者无从判断这个数是全量还是某一个工具的。
+    标题必须写清覆盖哪些工具和哪段日期，否则读者无从判断这个数是全量、某个工具，
+    还是某一个档案年的。
+
+    window 给定时只画这一段（用于往年那几张）；不给就画包含 end_date 的当前段。
     """
-    uid = f"k{theme.name}"
+    calendar = summary.get("prompt_calendar") or {}
+    if not calendar:
+        return ""
+
+    scope = " + ".join(summary.get("prompt_sources") or {}) or "all tools"
+    ramp = ramp_for(PRIMARY_RAMP, theme)
+    span_start, span_end = window or profile_years(
+        date.fromisoformat(min(calendar)), end_date
+    )[-1]
+
+    uid = f"k{theme.name}{span_start.year}{span_start.month:02d}"
     width, height = CARD_WIDTH, 192
     top = 60
 
-    calendar = summary.get("prompt_calendar") or {}
-    scope = " + ".join(summary.get("prompt_sources") or {}) or "all tools"
-    ramp = ramp_for(PRIMARY_RAMP, theme)
-    if not calendar:
-        return ""
-    start = date.fromisoformat(min(calendar))
-    start -= timedelta(days=(start.weekday() + 1) % 7)
-    days = (end_date - start).days + 1
+    start = span_start - timedelta(days=(span_start.weekday() + 1) % 7)  # 对齐到周日
+    days = (span_end - start).days + 1
     values = [calendar.get((start + timedelta(days=i)).isoformat(), 0) for i in range(days)]
-    active = sum(1 for value in values if value > 0)
+    # 统计只算档案年区间内的日子，别把周日对齐补进来的那几天算进去
+    inside = [v for d, v in ((start + timedelta(days=i), values[i]) for i in range(days))
+              if d >= span_start]
+    total, active = sum(inside), sum(1 for value in inside if value > 0)
 
     out = [open_svg(width, height, "Prompt calendar"), base_style(theme),
            frame(width, height, theme)]
     out.append(
-        f'<text class="h" x="16" y="30">{sum(calendar.values()):,} prompts '
-        f'since {esc(min(calendar))}</text>'
+        f'<text class="h" x="16" y="30">{total:,} prompts '
+        f'&#183; {esc(span_start.isoformat())} → {esc(span_end.isoformat())}</text>'
     )
     out.append(
         f'<text class="sub" x="{width - 16}" y="30" text-anchor="end">'
         f'{esc(scope)} · {active} active days</text>'
     )
 
-    grid, grid_left, grid_right = grid_block(values, start, end_date, uid, ramp, width, top)
+    grid, grid_left, grid_right = grid_block(values, start, span_end, uid, ramp, width, top)
     out.append(grid)
 
     foot_y = top + 7 * PITCH + 22
@@ -424,23 +500,23 @@ def card_models(summary: dict[str, Any], theme: Theme, source: str | None = None
     # 和它旁边写的 36% 对不上，读者只能猜条代表什么。
     grand = sum(value for _, value in ranked) or 1
     top, row_height, bar_left = 68, 27, 16
-    bar_width = width - 32
+    # 格宽和终端卡保持一致（7.35px），格数取铺满卡片所需的数量，这样两张卡的
+    # 点阵疏密看起来是同一种材质，只是条的长短不同
+    cols = int((width - 32) / BAR_CELL)
     bars = rank_colors(theme, len(models))
 
     for index, (name, value) in enumerate(models):
         y = top + index * row_height
-        length = max(2.0, bar_width * value / grand)
         out.append(
-            f'<g>'
             f'<text class="lab" x="{bar_left}" y="{y}" fill="{theme.fg}">'
             f'{esc(clip(name, 22))}</text>'
-            f'<text class="lab" x="{bar_left + bar_width}" y="{y}" text-anchor="end">'
+            f'<text class="lab" x="{bar_left + cols * BAR_CELL:.0f}" y="{y}" '
+            f'text-anchor="end">'
             f'{esc(compact(value))} · {value / grand * 100:.0f}%</text>'
-            f'<rect x="{bar_left}" y="{y + 5}" width="{bar_width}" height="6" rx="3" '
-            f'fill="{theme.subtle}"/>'
-            f'<rect x="{bar_left}" y="{y + 5}" width="{length:.1f}" height="6" rx="3" '
-            f'fill="{bars[index]}"/></g>'
         )
+        out.append(meter(f"m{theme.name}{source or 'all'}{index}".replace("-", ""),
+                         bar_left, y + 4, value / grand, bars[index], theme.faint,
+                         cols=cols, height=9))
 
     out.append(divider(width, height - 30, theme))
     out.append(
@@ -457,17 +533,13 @@ def card_terminal(summary: dict[str, Any], theme: Theme, title: str) -> str:
     """终端风格总览。主页现在只靠这张卡承载 token 口径，所以原「工具占比」卡
     （含 cached/output 拆分）和「模型榜」卡的信息都搬了进来。
 
-    占比条画成 <rect> 而不是 █░ 字符：字符条的长度取决于浏览器实际选中的等宽
-    字体，Mac 命中 SF Mono（字宽 0.6em）、Windows 命中 Consolas（0.55em），
-    24 格累积下来差十几个像素；Windows 还会把 █ 和 ░ 分成两个 shaping run 各自
-    做像素对齐，接缝处肉眼可见地错开。rect 的长度由代码算，和字体无关。
+    占比条见 meter()：形态还是 █████░░░░░░，但用 rect + pattern 画，格数和格宽
+    都照搬当初的字符条（24 格 × 7.35px），所以观感一致而不受字体影响。
     """
-    char = 7.35  # 12.5px 等宽字体的近似字宽，只用于文字列的起始位置
+    char = BAR_CELL  # 12.5px 等宽字体的近似字宽，只用于文字列的起始位置
     left, top, line_height = 22, 62, 20
     width = CARD_WIDTH
-    # 占比条的横向区间：从第 44 列起，一直铺到和左边距对称的右边距
-    bar_x = left + 44 * char
-    bar_width = width - left - bar_x
+    bar_x = left + 44 * char  # 占比条从第 44 列起，占 24 格，和原来的字符条同宽
 
     tools = sorted(summary.get("sources", {}))
     sources = sorted(summary.get("sources", {}).items(), key=lambda item: -item[1])
@@ -548,14 +620,8 @@ def card_terminal(summary: dict[str, Any], theme: Theme, title: str) -> str:
         )
         if index in bars:
             fraction, color = bars[index]
-            # 极小的占比也留 2px，否则 0.9% 这一行看上去像是没画条
-            length = max(2.0, bar_width * fraction)
-            out.append(
-                f'<rect x="{bar_x:.1f}" y="{y - 8}" width="{bar_width:.1f}" height="7" '
-                f'rx="3.5" fill="{theme.subtle}"/>'
-                f'<rect x="{bar_x:.1f}" y="{y - 8}" width="{length:.1f}" height="7" '
-                f'rx="3.5" fill="{color}"/>'
-            )
+            out.append(meter(f"t{theme.name}{index}", bar_x, y - 9, fraction,
+                             color, theme.faint))
     cursor_y = top + (len(lines) - 1) * line_height
     out.append(
         f'<rect class="cur" x="{left + 2 * char:.1f}" y="{cursor_y - 10}" width="8" '
@@ -688,14 +754,27 @@ def build_cards(daily: dict[str, dict[str, Any]], summary: dict[str, Any],
     )
     tools = sorted(summary.get("sources", {}))
 
+    # 提示日历按「档案年」切段：当前段上主页，往年的进 README 的折叠区。
+    # 不切的话网格每周多一列，880 宽的卡片撑到第 56 列就画到视口外面去了。
+    calendar_days = summary.get("prompt_calendar") or {}
+    spans = (profile_years(date.fromisoformat(min(calendar_days)), end_date)
+             if calendar_days else [])
+    summary["calendar_spans"] = [
+        {"key": calendar_key(start), "start": start.isoformat(), "end": end.isoformat()}
+        for start, end in spans
+    ]
+
     cards: dict[str, str] = {}
     for theme in THEMES:
         cards[f"heatmap-{theme.name}"] = card_heatmap(
             daily, end_date, window_days, summary, theme
         )
-        calendar = card_calendar(summary, end_date, theme)
-        if calendar:
-            cards[f"calendar-{theme.name}"] = calendar
+        for index, span in enumerate(spans):
+            # 最后一段是「当前档案年」，占主页那张 calendar；其余按年份命名
+            name = "calendar" if index == len(spans) - 1 else calendar_key(span[0])
+            cards[f"{name}-{theme.name}"] = card_calendar(
+                summary, end_date, theme, window=span
+            )
         cards[f"terminal-{theme.name}"] = card_terminal(summary, theme, title)
         # 分工具变体：README 用 <details> 折叠展示，本地报告用按钮切换
         for tool in tools:

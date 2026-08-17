@@ -632,24 +632,58 @@ def gallery_markdown(config: Config, digests: dict[str, str],
 
     # 分工具视图。README 里跑不了 JS，<details> 是 GitHub 唯一支持的原生交互，
     # 所以「只看某个工具」做成折叠区而不是按钮。
+    #
+    # 所有工具收进同一个折叠：每加一个 agent 就多一个折叠的话，主页会被摘要行堆满，
+    # 而这些摘要彼此是同一类信息。合成一个之后，加 qwen、gemini 之类只是往里面多
+    # 一节，主页高度不变。
     half = render.HALF_WIDTH
-    for tool in sorted(summary.get("sources", {})):
-        if f"heatmap-{tool}-dark" not in digests:
-            continue
-        share = summary["sources"][tool] / (sum(summary["sources"].values()) or 1)
-        prompts = (summary.get("prompt_sources") or {}).get(tool)
-        detail = f"{render.compact(summary['sources'][tool])} tokens, {share * 100:.0f}% of total"
-        if prompts:
-            detail += f" &nbsp;·&nbsp; {prompts:,} prompts"
-        rows = [
-            picture(config, f"heatmap-{tool}", digests, f"{tool} activity heatmap",
-                    render.CARD_WIDTH),
-            picture(config, f"models-{tool}", digests, f"{tool} models", half),
-        ]
-        body = "\n".join(f'<p align="center">{row}</p>' for row in rows)
+    tools = [t for t in sorted(summary.get("sources", {}))
+             if f"heatmap-{t}-dark" in digests]
+    if tools:
+        grand = sum(summary["sources"].values()) or 1
+        chips = " &nbsp;·&nbsp; ".join(
+            f"<b>{html.escape(t)}</b> {summary['sources'][t] / grand * 100:.0f}%"
+            for t in sorted(tools, key=lambda t: -summary["sources"][t])
+        )
+        sections = []
+        for tool in tools:
+            share = summary["sources"][tool] / grand
+            prompts = (summary.get("prompt_sources") or {}).get(tool)
+            detail = (f"{render.compact(summary['sources'][tool])} tokens "
+                      f"&nbsp;·&nbsp; {share * 100:.0f}% of total")
+            if prompts:
+                detail += f" &nbsp;·&nbsp; {prompts:,} prompts"
+            sections.append(
+                f'<p align="center"><b>{html.escape(tool)}</b> '
+                f"&nbsp;·&nbsp; {detail}</p>\n"
+                f'<p align="center">'
+                + picture(config, f"heatmap-{tool}", digests,
+                          f"{tool} activity heatmap", render.CARD_WIDTH)
+                + "</p>\n"
+                f'<p align="center">'
+                + picture(config, f"models-{tool}", digests, f"{tool} models", half)
+                + "</p>"
+            )
         blocks.append(
-            f"<details>\n<summary>&nbsp;<b>{html.escape(tool)}</b> only "
-            f"&nbsp;·&nbsp; {detail}</summary>\n<br>\n{body}\n</details>"
+            f"<details>\n<summary>&nbsp;<b>By tool</b> &nbsp;·&nbsp; {chips}</summary>\n"
+            f"<br>\n" + "\n".join(sections) + "\n</details>"
+        )
+
+    # 往年的提示日历。当前档案年在主页，更早的收进折叠区，摘要行写明起止日期。
+    spans = summary.get("calendar_spans") or []
+    past = [s for s in spans[:-1] if f"{s['key']}-dark" in digests]
+    if past:
+        labels = ", ".join(f"{s['start']} → {s['end']}" for s in reversed(past))
+        body = "\n".join(
+            f'<p align="center">'
+            + picture(config, s["key"], digests,
+                      f"Prompt calendar {s['start']} to {s['end']}", render.CARD_WIDTH)
+            + "</p>"
+            for s in reversed(past)
+        )
+        blocks.append(
+            f"<details>\n<summary>&nbsp;<b>Earlier years</b> &nbsp;·&nbsp; "
+            f"{html.escape(labels)}</summary>\n<br>\n{body}\n</details>"
         )
     return "\n\n".join(blocks)
 
