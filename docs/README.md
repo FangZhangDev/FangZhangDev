@@ -9,10 +9,11 @@ documentation lives here instead.
 Turns local Claude Code and Codex activity into a long-lived, public-safe profile:
 
 - normalized daily usage records suitable for a public Git repository;
-- five SVG views (token heatmap, prompt calendar, tool split, model ranking, terminal card),
-  each in a light and a dark variant, plus a per-tool heatmap and model card for every tool;
+- SVG cards in light and dark variants: the README carries a prompt calendar and a terminal
+  summary (which absorbs the old tool-split and model-ranking cards); each tool gets its own
+  heatmap, calendar, and model card under a `<details>` toggle;
 - an incremental SQLite cache so recurring updates do not reparse unchanged files;
-- an offline HTML report with a theme toggle.
+- an offline HTML report with a theme toggle and per-tool filter buttons.
 
 The collector reads local logs but never publishes prompts, source paths, credentials, raw
 transcripts, or repository names. Only aggregated usage facts reach `data/daily.jsonl` and
@@ -110,7 +111,10 @@ of the repository and lands on a 404. Inside `docs/` relative links are fine.
   `Less □□□□□ More` legend all mirror GitHub's contribution box, so the cards sit on a profile
   without looking imported. The ramps deliberately do **not** use GitHub's green: these grids
   count tokens and prompts, and borrowing the commit colors would invite reading them as commits.
-  `ramp` is violet for tokens, `ramp_alt` cyan for prompts — two metrics, two hues.
+  Ramps live in the `RAMPS` table keyed by hue, not on the `Theme`: violet is the
+  primary metric (the combined prompt calendar and the all-tools heatmap), and each tool
+  gets its own hue from `TOOL_RAMPS` (claude-code cyan, codex pink) shared by its heatmap,
+  calendar, and the bars in the terminal card - one hue per thing being measured.
 
 ## Long-term publishing
 

@@ -559,19 +559,15 @@ def write_ledger(config: Config, daily: dict[str, dict[str, Any]]) -> int:
 GALLERY_BEGIN = "<!-- profile:gallery:begin -->"
 GALLERY_END = "<!-- profile:gallery:end -->"
 
-# README 图集布局：每行一个卡片名列表，同行的卡片会并排显示
+# README 图集布局：每行一个卡片名列表，同行的卡片会并排显示。
+# token 口径集中在终端卡里；分工具热力图/模型榜放 <details> 折叠区（见下）。
 GALLERY_ROWS: tuple[tuple[str, ...], ...] = (
-    ("heatmap",),
     ("calendar",),
-    ("stats", "models"),
     ("terminal",),
 )
 
 CARD_ALT = {
-    "heatmap": "Token activity heatmap",
     "calendar": "Prompt calendar",
-    "stats": "Token split by tool",
-    "models": "Top models by usage",
     "terminal": "Terminal-style summary",
 }
 

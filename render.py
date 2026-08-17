@@ -39,8 +39,6 @@ class Theme:
     muted: str  # 次要文字
     faint: str  # 刻度、脚注
     accents: tuple[str, ...]  # 分类色，取自 Primer 的 purple/pink/amber/cyan/green/blue
-    ramp: tuple[str, str, str, str, str]  # token 热力图 0-4 级
-    ramp_alt: tuple[str, str, str, str, str]  # 提示日历 0-4 级
 
 
 # 方格的几何、月份刻度、Less/More 图例都照搬 GitHub，但色相刻意避开贡献图的绿：
@@ -55,8 +53,6 @@ DARK = Theme(
     muted="#9198a1",
     faint="#6e7681",
     accents=("#a371f7", "#f778ba", "#e3b341", "#56d4dd", "#3fb950", "#4493f8"),
-    ramp=("#161b22", "#30215f", "#4d2fa0", "#7449d6", "#a78bfa"),
-    ramp_alt=("#161b22", "#0c3b45", "#0f6577", "#1a9db5", "#56d4dd"),
 )
 
 LIGHT = Theme(
@@ -68,11 +64,38 @@ LIGHT = Theme(
     muted="#59636e",
     faint="#818b98",
     accents=("#8250df", "#bf3989", "#9a6700", "#0e7490", "#1a7f37", "#0969da"),
-    ramp=("#ebedf0", "#ddd0fb", "#b794f4", "#8250df", "#553098"),
-    ramp_alt=("#ebedf0", "#c8eaf2", "#7fd0e0", "#2497b4", "#0b6b80"),
 )
 
 THEMES = (DARK, LIGHT)
+
+# 网格梯度按用途取用，不绑在主题上：一个色相代表一个含义。紫色是主日历，青色和
+# 粉色分给两个工具，让分工具视图一眼可辨。绿色留给 GitHub 真正的贡献图。
+RAMPS: dict[str, dict[str, tuple[str, str, str, str, str]]] = {
+    "violet": {
+        "dark": ("#161b22", "#30215f", "#4d2fa0", "#7449d6", "#a78bfa"),
+        "light": ("#ebedf0", "#ddd0fb", "#b794f4", "#8250df", "#553098"),
+    },
+    "cyan": {
+        "dark": ("#161b22", "#0c3b45", "#0f6577", "#1a9db5", "#56d4dd"),
+        "light": ("#ebedf0", "#c8eaf2", "#7fd0e0", "#2497b4", "#0b6b80"),
+    },
+    "pink": {
+        "dark": ("#161b22", "#4d1533", "#8a1f57", "#c93a84", "#f778ba"),
+        "light": ("#ebedf0", "#fbd3e7", "#f19cc8", "#d4459a", "#8c1d5e"),
+    },
+}
+
+PRIMARY_RAMP = "violet"
+TOOL_RAMPS = ("cyan", "pink", "violet")  # 按工具名排序循环取用
+
+
+def ramp_for(name: str, theme: Theme) -> tuple[str, str, str, str, str]:
+    return RAMPS.get(name, RAMPS[PRIMARY_RAMP])[theme.name]
+
+
+def tool_ramp(tool: str, tools: Sequence[str], theme: Theme) -> tuple[str, ...]:
+    index = list(tools).index(tool) if tool in tools else 0
+    return ramp_for(TOOL_RAMPS[index % len(TOOL_RAMPS)], theme)
 
 # GitHub 贡献图的方格比例：10px 方块、3px 间距、2px 圆角。
 # 这里放大到 12px 以填满 880 宽的卡片，比例保持不变。
@@ -216,6 +239,11 @@ def grid_block(values: Sequence[int], start: date, end_date: date, uid: str,
         f'<defs><rect id="{uid}c" width="{CELL}" height="{CELL}" rx="{RADIUS}"/></defs>'
     ]
 
+    # 月份刻度：先收集所有换月的列，再筛掉画不下的。窗口首尾那两个月往往只占
+    # 一两列，直接标就会和邻月挤成「SepOct」。所以一个月至少要占 MIN_MONTH_COLS
+    # 列才配拥有标签，且相邻标签之间也要留够间距。
+    MIN_MONTH_COLS = 3
+    changes: list[tuple[int, int]] = []
     last_month = None
     for column in range(columns):
         day = start + timedelta(days=column * 7)
@@ -223,11 +251,20 @@ def grid_block(values: Sequence[int], start: date, end_date: date, uid: str,
             break
         if day.month != last_month:
             last_month = day.month
-            x = left + column * PITCH
-            if x < left + grid_width - 18:
-                parts.append(
-                    f'<text class="tick" x="{x}" y="{top - 6}">{MONTHS[day.month - 1]}</text>'
-                )
+            changes.append((column, day.month))
+
+    placed: list[int] = []
+    for index, (column, month) in enumerate(changes):
+        span_end = changes[index + 1][0] if index + 1 < len(changes) else columns
+        if span_end - column < MIN_MONTH_COLS:
+            continue
+        if placed and column - placed[-1] < MIN_MONTH_COLS:
+            continue
+        placed.append(column)
+        parts.append(
+            f'<text class="tick" x="{left + column * PITCH}" y="{top - 6}">'
+            f'{MONTHS[month - 1]}</text>'
+        )
 
     for label, row in (("Mon", 1), ("Wed", 3), ("Fri", 5)):
         parts.append(
@@ -267,6 +304,9 @@ def card_heatmap(daily: dict[str, dict[str, Any]], end_date: date, window_days: 
     values = [value_of((start + timedelta(days=i)).isoformat()) for i in range(days)]
     total = sum(values)
     active = sum(1 for value in values if value > 0)
+    # 汇总视图用主色（紫）；分工具视图按工具取青/粉，和它们各自的提示日历一致
+    tools = sorted(summary.get("sources", {}))
+    ramp = tool_ramp(source, tools, theme) if source else ramp_for(PRIMARY_RAMP, theme)
 
     out = [open_svg(width, height, "Token activity heatmap"), base_style(theme),
            frame(width, height, theme)]
@@ -280,7 +320,7 @@ def card_heatmap(daily: dict[str, dict[str, Any]], end_date: date, window_days: 
         f'{active} active days · peak {esc(compact(max(values) if values else 0))}/day</text>'
     )
 
-    grid, grid_left, grid_right = grid_block(values, start, end_date, uid, theme.ramp, width, top)
+    grid, grid_left, grid_right = grid_block(values, start, end_date, uid, ramp, width, top)
     out.append(grid)
 
     foot_y = top + 7 * PITCH + 22
@@ -288,7 +328,7 @@ def card_heatmap(daily: dict[str, dict[str, Any]], end_date: date, window_days: 
         f'<text class="foot" x="{grid_left}" y="{foot_y}">'
         f'Reported usage units, not a bill</text>'
     )
-    out.append(legend(grid_right - 152, foot_y, theme.ramp))
+    out.append(legend(grid_right - 152, foot_y, ramp))
     return "".join(out) + "</svg>"
 
 
@@ -310,9 +350,11 @@ def card_calendar(summary: dict[str, Any], end_date: date, theme: Theme,
     if source:
         calendar = (summary.get("prompt_calendar_by_source") or {}).get(source, {})
         scope = source
+        ramp = tool_ramp(source, sorted(summary.get("sources", {})), theme)
     else:
         calendar = summary.get("prompt_calendar") or {}
         scope = " + ".join(summary.get("prompt_sources") or {}) or "all tools"
+        ramp = ramp_for(PRIMARY_RAMP, theme)
     if not calendar:
         return ""
     start = date.fromisoformat(min(calendar))
@@ -332,7 +374,7 @@ def card_calendar(summary: dict[str, Any], end_date: date, theme: Theme,
         f'{esc(scope)} · {active} active days</text>'
     )
 
-    grid, grid_left, grid_right = grid_block(values, start, end_date, uid, theme.ramp_alt, width, top)
+    grid, grid_left, grid_right = grid_block(values, start, end_date, uid, ramp, width, top)
     out.append(grid)
 
     foot_y = top + 7 * PITCH + 22
@@ -340,78 +382,7 @@ def card_calendar(summary: dict[str, Any], end_date: date, theme: Theme,
         f'<text class="foot" x="{grid_left}" y="{foot_y}">'
         f'Prompts you sent, any model · timestamps only, no content read</text>'
     )
-    out.append(legend(grid_right - 152, foot_y, theme.ramp_alt))
-    return "".join(out) + "</svg>"
-
-
-# ---------------------------------------------------------------- 卡片：工具占比
-
-
-def card_stats(summary: dict[str, Any], theme: Theme) -> str:
-    uid = f"s{theme.name}"
-    width, height = HALF_WIDTH, 240
-    out = [open_svg(width, height, "Usage split by tool"), base_style(theme),
-           frame(width, height, theme)]
-    out.append('<text class="h fu" x="16" y="30">Split by tool</text>')
-    out.append(divider(width, 44, theme))
-
-    sources = sorted(summary.get("sources", {}).items(), key=lambda item: -item[1])
-    total = sum(value for _, value in sources) or 1
-
-    cx, cy, radius, thickness = 96, 122, 46, 14
-    circumference = 2 * math.pi * radius
-    out.append(
-        f'<circle cx="{cx}" cy="{cy}" r="{radius}" fill="none" '
-        f'stroke="{theme.subtle}" stroke-width="{thickness}"/>'
-    )
-    offset = 0.0
-    for index, (name, value) in enumerate(sources):
-        length = circumference * value / total
-        # dashoffset 用于给扇段定位，所以动画只能加在外层 <g> 上，不能碰弧本身
-        out.append(
-            f'<g class="fi" style="animation-delay:{.1 + index * .1:.2f}s">'
-            f'<circle cx="{cx}" cy="{cy}" r="{radius}" fill="none" '
-            f'stroke="{theme.accents[index % len(theme.accents)]}" stroke-width="{thickness}" '
-            f'stroke-dasharray="{length - 2.5:.1f} {circumference - length + 2.5:.1f}" '
-            f'stroke-dashoffset="{-offset:.1f}" transform="rotate(-90 {cx} {cy})"/></g>'
-        )
-        offset += length
-    out.append(
-        f'<text class="num" x="{cx}" y="{cy + 2}" text-anchor="middle">'
-        f'{esc(compact(summary["total_tokens"]))}</text>'
-        f'<text class="lab" x="{cx}" y="{cy + 20}" text-anchor="middle">tokens</text>'
-    )
-
-    legend_x, legend_y = 184, 78
-    for index, (name, value) in enumerate(sources):
-        y = legend_y + index * 32
-        out.append(
-            f'<g class="fu" style="animation-delay:{.14 + index * .07:.2f}s">'
-            f'<rect x="{legend_x}" y="{y - 9}" width="10" height="10" rx="3" '
-            f'fill="{theme.accents[index % len(theme.accents)]}"/>'
-            f'<text class="h" x="{legend_x + 18}" y="{y}">{esc(clip(name, 18))}</text>'
-            f'<text class="lab" x="{legend_x + 18}" y="{y + 15}">'
-            f'{esc(compact(value))} · {value / total * 100:.0f}%</text></g>'
-        )
-
-    rows = [
-        ("Sessions", f"{summary['sessions']:,}"),
-        ("Turns", compact(summary["turns"])),
-        ("Output", compact(summary["output_tokens"])),
-        ("Cached in", compact(summary["cache_read_tokens"])),
-    ]
-    base_y = legend_y + len(sources) * 32 + 12
-    for index, (label, value) in enumerate(rows):
-        x = legend_x + (index % 2) * 118
-        y = base_y + (index // 2) * 34
-        out.append(
-            f'<g class="fu" style="animation-delay:{.24 + index * .05:.2f}s">'
-            f'<text class="num-s" x="{x}" y="{y}">{esc(value)}</text>'
-            f'<text class="lab" x="{x}" y="{y + 15}">{esc(label)}</text></g>'
-        )
-
-    out.append(divider(width, height - 30, theme))
-    out.append(f'<text class="foot" x="16" y="{height - 12}">Cached input counted separately</text>')
+    out.append(legend(grid_right - 152, foot_y, ramp))
     return "".join(out) + "</svg>"
 
 
@@ -470,34 +441,61 @@ def card_models(summary: dict[str, Any], theme: Theme, source: str | None = None
 
 
 def card_terminal(summary: dict[str, Any], theme: Theme, title: str) -> str:
+    """终端风格总览。主页现在只靠这张卡承载 token 口径，所以原「工具占比」卡
+    （含 cached/output 拆分）和「模型榜」卡的信息都搬了进来，图形条换成字符条，
+    保持终端的观感。
+    """
     char = 7.35  # 12.5px 等宽字体的近似字宽，用于列对齐
     left, top, line_height = 22, 62, 20
     width = CARD_WIDTH
+    bar_cols = 24  # 字符条的格数，工具条和模型条同宽便于横向比较
 
+    tools = sorted(summary.get("sources", {}))
     sources = sorted(summary.get("sources", {}).items(), key=lambda item: -item[1])
     grand = sum(value for _, value in sources) or 1
+    models = list(summary.get("top_models", []))[:6]
+    model_grand = sum(value for _, value in summary.get("top_models", [])) or 1
+    model_peak = max((value for _, value in models), default=0) or 1
+
+    def bar(fraction: float) -> str:
+        filled = max(1, round(fraction * bar_cols))
+        return "█" * filled + "░" * (bar_cols - filled)
 
     lines: list[list[tuple[float, str, str]]] = [
         [(0, "$", theme.accents[0]), (2, "profile stats --since ", theme.fg),
          (24, str(summary.get("first_date") or "—"), theme.accents[1])],
         [],
-        [(2, "total tokens", theme.muted), (20, compact(summary["total_tokens"]), theme.fg),
-         (32, "reported usage units", theme.faint)],
-        [(2, "active days", theme.muted), (20, str(summary["active_days"]), theme.fg),
-         (32, f"{summary.get('first_date') or '—'} → {summary.get('last_date') or '—'}", theme.faint)],
-        [(2, "sessions", theme.muted), (20, f"{summary['sessions']:,}", theme.fg),
-         (32, f"{compact(summary['turns'])} turns", theme.faint)],
+        [(2, "total tokens", theme.muted), (22, compact(summary["total_tokens"]), theme.fg),
+         (34, "reported usage units", theme.faint)],
+        [(2, "active days", theme.muted), (22, str(summary["active_days"]), theme.fg),
+         (34, f"{summary.get('first_date') or '—'} → {summary.get('last_date') or '—'}",
+          theme.faint)],
+        [(2, "sessions", theme.muted), (22, f"{summary['sessions']:,}", theme.fg),
+         (34, f"{compact(summary['turns'])} turns", theme.faint)],
+        [(2, "cached in", theme.muted), (22, compact(summary["cache_read_tokens"]), theme.fg),
+         (34, f"output {compact(summary['output_tokens'])}", theme.faint)],
         [],
+        [(2, "# by tool", theme.faint)],
     ]
+    # 工具条用它在分工具热力图里的同一色相，读者在折叠区看到的是同一种颜色
     for name, value in sources[:3]:
-        share = value / grand
-        filled = round(share * 22)
         lines.append([
             (2, clip(name, 16), theme.muted),
-            (20, compact(value), theme.fg),
-            (32, f"{share * 100:5.1f}%", theme.faint),
-            (40, "█" * filled + "░" * (22 - filled), theme.accents[0]),
+            (22, compact(value), theme.fg),
+            (34, f"{value / grand * 100:5.1f}%", theme.faint),
+            (44, bar(value / grand), tool_ramp(name, tools, theme)[4]),
         ])
+    lines.append([])
+    lines.append([(2, "# top models", theme.faint)])
+    for index, (name, value) in enumerate(models):
+        lines.append([
+            (2, clip(name, 18), theme.muted),
+            (22, compact(value), theme.fg),
+            (34, f"{value / model_grand * 100:5.1f}%", theme.faint),
+            (44, bar(value / model_peak), theme.accents[index % len(theme.accents)]),
+        ])
+    if not models:
+        lines.append([(2, "no model data yet", theme.faint)])
     lines.append([])
     lines.append([(0, "$", theme.accents[0])])
 
@@ -540,7 +538,8 @@ def card_terminal(summary: dict[str, Any], theme: Theme, title: str) -> str:
 # ---------------------------------------------------------------- HTML 报告
 
 
-CARD_ORDER = ("heatmap", "calendar", "stats", "models", "terminal")
+# 主页图集顺序；stats/models 已并入终端卡，全量热力图只留给本地报告
+CARD_ORDER = ("heatmap", "calendar", "terminal")
 
 
 def report_html(title: str, subtitle: str, cards: dict[str, str],
@@ -647,9 +646,8 @@ for (const button of document.querySelectorAll('[data-filter]')) {{
 CARD_SIZES = {
     "heatmap": (CARD_WIDTH, 192),
     "calendar": (CARD_WIDTH, 192),
-    "stats": (HALF_WIDTH, 240),
-    "models": (HALF_WIDTH, 240),
-    "terminal": (CARD_WIDTH, 270),
+    "models": (HALF_WIDTH, 240),  # 分工具折叠区仍在用
+    "terminal": (CARD_WIDTH, 470),
 }
 
 
@@ -669,8 +667,6 @@ def build_cards(daily: dict[str, dict[str, Any]], summary: dict[str, Any],
         calendar = card_calendar(summary, end_date, theme)
         if calendar:
             cards[f"calendar-{theme.name}"] = calendar
-        cards[f"stats-{theme.name}"] = card_stats(summary, theme)
-        cards[f"models-{theme.name}"] = card_models(summary, theme)
         cards[f"terminal-{theme.name}"] = card_terminal(summary, theme, title)
         # 分工具变体：README 用 <details> 折叠展示，本地报告用按钮切换
         for tool in tools:
