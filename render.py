@@ -587,6 +587,12 @@ def card_terminal(summary: dict[str, Any], theme: Theme, title: str) -> str:
     """终端风格总览。主页现在只靠这张卡承载 token 口径，所以原「工具占比」卡
     （含 cached/output 拆分）和「模型榜」卡的信息都搬了进来。
 
+    两组的表现方式是有意不同的：
+
+    - # by tool 只有两三行，是「整体怎么分」的问题，占比条最直观，所以保留；
+    - # top models 有八行，八条并排会把这张卡压得很满。这里改成给模型名上色、
+      不画条，量级交给右边的数字和百分比。颜色在这一组只负责区分名次，不编码大小。
+
     占比条见 meter()：形态还是 █████░░░░░░，但用 rect + pattern 画，格数和格宽
     都照搬当初的字符条（24 格 × 7.35px），所以观感一致而不受字体影响。
     """
@@ -634,12 +640,11 @@ def card_terminal(summary: dict[str, Any], theme: Theme, title: str) -> str:
         ])
     lines.append([])
     lines.append([(2, "# top models", theme.faint)])
-    # 终端卡按名次取手挑的那组色；折叠区的模型卡仍用 rank_colors 的单色相渐变
-    model_bars = TERMINAL_MODEL_COLORS[theme.name]
+    # 名次配色落在模型名上，不画条。折叠区的模型卡仍用 rank_colors 的单色相渐变
+    palette = TERMINAL_MODEL_COLORS[theme.name]
     for index, (name, value) in enumerate(models):
-        bars[len(lines)] = (value / model_grand, model_bars[index])
         lines.append([
-            (2, clip(name, 18), theme.muted),
+            (2, clip(name, 18), palette[index]),
             (22, compact(value), theme.fg),
             (34, f"{value / model_grand * 100:5.1f}%", theme.faint),
         ])
