@@ -11,7 +11,7 @@ Turns local Claude Code and Codex activity into a long-lived, public-safe profil
 - normalized daily usage records suitable for a public Git repository;
 - SVG cards in light and dark variants: the README carries a prompt calendar and a terminal
   summary (which absorbs the old tool-split and model-ranking cards); each tool gets its own
-  heatmap, calendar, and model card under a `<details>` toggle;
+  heatmap and model card under a `<details>` toggle;
 - an incremental SQLite cache so recurring updates do not reparse unchanged files;
 - an offline HTML report with a theme toggle and per-tool filter buttons.
 
@@ -114,7 +114,7 @@ of the repository and lands on a 404. Inside `docs/` relative links are fine.
   Ramps live in the `RAMPS` table keyed by hue, not on the `Theme`: violet is the
   primary metric (the combined prompt calendar and the all-tools heatmap), and each tool
   gets its own hue from `TOOL_RAMPS` (claude-code cyan, codex pink) shared by its heatmap,
-  calendar, and the bars in the terminal card - one hue per thing being measured.
+  and the bars in the terminal card - one hue per thing being measured.
 
 ## Long-term publishing
 

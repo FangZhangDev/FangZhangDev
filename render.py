@@ -38,7 +38,7 @@ class Theme:
     fg: str  # 主文字
     muted: str  # 次要文字
     faint: str  # 刻度、脚注
-    accents: tuple[str, ...]  # 分类色，取自 Primer 的 purple/pink/amber/cyan/green/blue
+    accents: tuple[str, ...]  # 分类色，取自 Catppuccin：暗色用 Mocha、亮色用 Latte
 
 
 # 方格的几何、月份刻度、Less/More 图例都照搬 GitHub，但色相刻意避开贡献图的绿：
@@ -52,7 +52,7 @@ DARK = Theme(
     fg="#f0f6fc",
     muted="#9198a1",
     faint="#6e7681",
-    accents=("#a371f7", "#f778ba", "#e3b341", "#56d4dd", "#3fb950", "#4493f8"),
+    accents=("#cba6f7", "#89b4fa", "#94e2d5", "#f5c2e7", "#fab387", "#a6e3a1"),
 )
 
 LIGHT = Theme(
@@ -63,7 +63,7 @@ LIGHT = Theme(
     fg="#1f2328",
     muted="#59636e",
     faint="#818b98",
-    accents=("#8250df", "#bf3989", "#9a6700", "#0e7490", "#1a7f37", "#0969da"),
+    accents=("#8839ef", "#1e66f5", "#179299", "#ea76cb", "#fe640b", "#40a02b"),
 )
 
 THEMES = (DARK, LIGHT)
@@ -96,6 +96,28 @@ def ramp_for(name: str, theme: Theme) -> tuple[str, str, str, str, str]:
 def tool_ramp(tool: str, tools: Sequence[str], theme: Theme) -> tuple[str, ...]:
     index = list(tools).index(tool) if tool in tools else 0
     return ramp_for(TOOL_RAMPS[index % len(TOOL_RAMPS)], theme)
+
+
+def lerp_hex(start: str, end: str, fraction: float) -> str:
+    """两色之间做线性插值，用于给排名条生成同族渐变。"""
+    a = tuple(int(start[i:i + 2], 16) for i in (1, 3, 5))
+    b = tuple(int(end[i:i + 2], 16) for i in (1, 3, 5))
+    mixed = [round(x + (y - x) * fraction) for x, y in zip(a, b)]
+    return "#{:02x}{:02x}{:02x}".format(*mixed)
+
+
+def rank_colors(theme: Theme, count: int) -> list[str]:
+    """排名条的渐变色：第 1 名用主色 mauve，末名过渡到 teal。
+
+    排名是有序数据，用同族渐变比每行换一个色相耐看得多，而且两端正好是
+    「紫 = 汇总口径、青 = 工具口径」的两个品牌色相。
+    """
+    if count <= 1:
+        return [theme.accents[0]]
+    return [
+        lerp_hex(theme.accents[0], theme.accents[2], index / (count - 1))
+        for index in range(count)
+    ]
 
 # GitHub 贡献图的方格比例：10px 方块、3px 间距、2px 圆角。
 # 这里放大到 12px 以填满 880 宽的卡片，比例保持不变。
@@ -335,26 +357,20 @@ def card_heatmap(daily: dict[str, dict[str, Any]], end_date: date, window_days: 
 # ---------------------------------------------------------------- 卡片：提示日历
 
 
-def card_calendar(summary: dict[str, Any], end_date: date, theme: Theme,
-                  source: str | None = None) -> str:
+def card_calendar(summary: dict[str, Any], end_date: date, theme: Theme) -> str:
     """提示日历。覆盖期比 token 热力图长：会话记录被清理后 token 不可考，
     但提示时间戳留着，所以这张能一路回溯到最早的使用记录。
 
     数的是「你敲了多少条提示」，和哪个模型作答无关 —— 提示历史里没有模型字段。
     标题必须写清覆盖哪些工具，否则读者无从判断这个数是全量还是某一个工具的。
     """
-    uid = f"k{theme.name}{(source or 'all').replace('-', '')}"
+    uid = f"k{theme.name}"
     width, height = CARD_WIDTH, 192
     top = 60
 
-    if source:
-        calendar = (summary.get("prompt_calendar_by_source") or {}).get(source, {})
-        scope = source
-        ramp = tool_ramp(source, sorted(summary.get("sources", {})), theme)
-    else:
-        calendar = summary.get("prompt_calendar") or {}
-        scope = " + ".join(summary.get("prompt_sources") or {}) or "all tools"
-        ramp = ramp_for(PRIMARY_RAMP, theme)
+    calendar = summary.get("prompt_calendar") or {}
+    scope = " + ".join(summary.get("prompt_sources") or {}) or "all tools"
+    ramp = ramp_for(PRIMARY_RAMP, theme)
     if not calendar:
         return ""
     start = date.fromisoformat(min(calendar))
@@ -412,6 +428,7 @@ def card_models(summary: dict[str, Any], theme: Theme, source: str | None = None
     grand = sum(value for _, value in ranked) or 1
     top, row_height, bar_left = 68, 27, 16
     bar_width = width - 32
+    bars = rank_colors(theme, len(models))
 
     for index, (name, value) in enumerate(models):
         y = top + index * row_height
@@ -426,7 +443,7 @@ def card_models(summary: dict[str, Any], theme: Theme, source: str | None = None
             f'fill="{theme.subtle}"/>'
             f'<rect class="gw" style="animation-delay:{.12 + index * .06:.2f}s" '
             f'x="{bar_left}" y="{y + 5}" width="{length:.1f}" height="6" rx="3" '
-            f'fill="{theme.accents[index % len(theme.accents)]}"/></g>'
+            f'fill="{bars[index]}"/></g>'
         )
 
     out.append(divider(width, height - 30, theme))
@@ -487,12 +504,13 @@ def card_terminal(summary: dict[str, Any], theme: Theme, title: str) -> str:
         ])
     lines.append([])
     lines.append([(2, "# top models", theme.faint)])
+    model_bars = rank_colors(theme, max(len(models), 1))
     for index, (name, value) in enumerate(models):
         lines.append([
             (2, clip(name, 18), theme.muted),
             (22, compact(value), theme.fg),
             (34, f"{value / model_grand * 100:5.1f}%", theme.faint),
-            (44, bar(value / model_peak), theme.accents[index % len(theme.accents)]),
+            (44, bar(value / model_peak), model_bars[index]),
         ])
     if not models:
         lines.append([(2, "no model data yet", theme.faint)])
@@ -560,7 +578,7 @@ def report_html(title: str, subtitle: str, cards: dict[str, str],
                     f'<img src="{name}-{theme}.svg" alt="{esc(name)}"></figure>'
                 )
         for tool in tools:
-            for name in ("heatmap", "calendar", "models"):
+            for name in ("heatmap", "models"):
                 key = f"{name}-{tool}-{theme}"
                 if key in cards:
                     blocks.append(
@@ -582,8 +600,8 @@ def report_html(title: str, subtitle: str, cards: dict[str, str],
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(title)}</title>
 <style>
-:root{{--bg:#010409;--fg:#f0f6fc;--muted:#9198a1;--line:#3d444d;--panel:#0d1117;--accent:#3fb950}}
-[data-theme=light]{{--bg:#f6f8fa;--fg:#1f2328;--muted:#59636e;--line:#d1d9e0;--panel:#fff;--accent:#1a7f37}}
+:root{{--bg:#010409;--fg:#f0f6fc;--muted:#9198a1;--line:#3d444d;--panel:#0d1117;--accent:#cba6f7}}
+[data-theme=light]{{--bg:#f6f8fa;--fg:#1f2328;--muted:#59636e;--line:#d1d9e0;--panel:#fff;--accent:#8839ef}}
 *{{box-sizing:border-box}}
 body{{margin:0;padding:40px 24px 72px;background:var(--bg);color:var(--fg);
 font-family:{FONT};transition:background .2s,color .2s}}
@@ -674,7 +692,4 @@ def build_cards(daily: dict[str, dict[str, Any]], summary: dict[str, Any],
                 daily, end_date, window_days, summary, theme, source=tool
             )
             cards[f"models-{tool}-{theme.name}"] = card_models(summary, theme, source=tool)
-            tool_calendar = card_calendar(summary, end_date, theme, source=tool)
-            if tool_calendar:
-                cards[f"calendar-{tool}-{theme.name}"] = tool_calendar
     return cards

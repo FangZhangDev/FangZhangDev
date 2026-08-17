@@ -506,7 +506,7 @@ def merge_backfill(daily: dict[str, dict[str, Any]], summary: dict[str, Any],
     # Claude 的终身累计（stats-cache 的 modelUsage）没有日期维度，无法进热力图，
     # 只作为参考留在 profile.json 里；卡片一律用有日期的口径，保持前后一致。
     summary["claude_lifetime_tokens"] = stats.get("lifetime_tokens", 0)
-    # 提示日历跨全部工具汇总，并保留分工具明细供折叠区使用
+    # 提示日历跨全部工具汇总；分工具明细留在 profile.json 里备查
     merged: Counter[str] = Counter()
     for counts in prompts.values():
         merged.update(counts)
@@ -628,11 +628,8 @@ def gallery_markdown(config: Config, digests: dict[str, str],
         rows = [
             picture(config, f"heatmap-{tool}", digests, f"{tool} activity heatmap",
                     render.CARD_WIDTH),
+            picture(config, f"models-{tool}", digests, f"{tool} models", half),
         ]
-        if f"calendar-{tool}-dark" in digests:
-            rows.append(picture(config, f"calendar-{tool}", digests,
-                                f"{tool} prompt calendar", render.CARD_WIDTH))
-        rows.append(picture(config, f"models-{tool}", digests, f"{tool} models", half))
         body = "\n".join(f'<p align="center">{row}</p>' for row in rows)
         blocks.append(
             f"<details>\n<summary>&nbsp;<b>{html.escape(tool)}</b> only "
