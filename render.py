@@ -151,6 +151,10 @@ PITCH = CELL + GAP
 CARD_WIDTH = 880
 HALF_WIDTH = 440  # 两张并排刚好等于一张整宽，README 里两行才能左右对齐
 
+# 终端卡的模型行数上限。这张卡在主页，行数不设限的话模型攒多了会把它拉得老长；
+# 折叠区的模型卡则不限，能上榜的都列出来。
+TERMINAL_MODEL_ROWS = 10
+
 
 # ---------------------------------------------------------------- 基础工具
 
@@ -492,34 +496,51 @@ def card_calendar(summary: dict[str, Any], end_date: date, theme: Theme,
 
 
 def card_models(summary: dict[str, Any], theme: Theme, source: str | None = None) -> str:
-    uid = f"d{theme.name}"
-    width, height = HALF_WIDTH, 240
-    out = [open_svg(width, height, "Top models"), base_style(theme),
-           frame(width, height, theme)]
+    """模型榜。这张卡在折叠区里，不封顶行数 —— 能上榜的都列出来，卡片跟着长高。
+
+    高度必须算出来而不是写死：原先固定 240 高、脚注分隔线钉在 height-30，六行时
+    最后一条占 y 208–214，分隔线正好落在 210，从条中间穿过去。行数一放开只会更糟。
+    """
+    width, bar_left = HALF_WIDTH, 16
+    bar_width = width - 32
+    top, row_height = 68, 27
     heading = f"Models · {source}" if source else "Models used"
-    out.append(f'<text class="h" x="16" y="30">{esc(heading)}</text>')
-    out.append(divider(width, 44, theme))
 
     if source:
         by_model = (summary.get("models_by_source") or {}).get(source, {})
         ranked = sorted(by_model.items(), key=lambda item: -item[1])
     else:
         ranked = list(summary.get("top_models", []))
-    models = ranked[:6]
-    if not models:
-        out.append(f'<text class="sub" x="16" y="72">No model data yet</text>')
-        return "".join(out) + "</svg>"
+
+    if not ranked:
+        height = 110
+        return "".join([
+            open_svg(width, height, "Top models"), base_style(theme),
+            frame(width, height, theme),
+            f'<text class="h" x="16" y="30">{esc(heading)}</text>',
+            divider(width, 44, theme),
+            '<text class="sub" x="16" y="72">No model data yet</text>',
+        ]) + "</svg>"
+
+    # 最后一行的条底 + 留白 → 分隔线 → 脚注 → 下边距
+    bottom = top + (len(ranked) - 1) * row_height + 11
+    divider_y = bottom + 16
+    foot_y = divider_y + 18
+    height = foot_y + 12
+
+    out = [open_svg(width, height, "Top models"), base_style(theme),
+           frame(width, height, theme),
+           f'<text class="h" x="16" y="30">{esc(heading)}</text>',
+           divider(width, 44, theme)]
 
     # 条长和标签用同一个分母（全部模型的 token 总和），否则第一名总是画满，
     # 和它旁边写的 36% 对不上，读者只能猜条代表什么。
     grand = sum(value for _, value in ranked) or 1
-    top, row_height, bar_left = 68, 27, 16
-    bar_width = width - 32
-    bars = rank_colors(theme, len(models))
+    bars = rank_colors(theme, len(ranked))
 
     # 这里用干净的圆角条，不用终端卡那种点阵条：█░ 的颗粒感是终端的语言，
     # 放到图表卡上只是噪点。同一份数据在两处各说各的话，反而更清楚。
-    for index, (name, value) in enumerate(models):
+    for index, (name, value) in enumerate(ranked):
         y = top + index * row_height
         length = max(2.0, bar_width * value / grand)
         out.append(
@@ -533,9 +554,9 @@ def card_models(summary: dict[str, Any], theme: Theme, source: str | None = None
             f'fill="{bars[index]}"/>'
         )
 
-    out.append(divider(width, height - 30, theme))
+    out.append(divider(width, divider_y, theme))
     out.append(
-        f'<text class="foot" x="16" y="{height - 12}">'
+        f'<text class="foot" x="16" y="{foot_y}">'
         f'{len(ranked)} distinct models · bar length = share of all model tokens</text>'
     )
     return "".join(out) + "</svg>"
@@ -559,8 +580,11 @@ def card_terminal(summary: dict[str, Any], theme: Theme, title: str) -> str:
     tools = sorted(summary.get("sources", {}))
     sources = sorted(summary.get("sources", {}).items(), key=lambda item: -item[1])
     grand = sum(value for _, value in sources) or 1
-    models = list(summary.get("top_models", []))[:6]
-    model_grand = sum(value for _, value in summary.get("top_models", [])) or 1
+    # 终端卡封顶 10 行：这张卡在主页上，模型攒多了会把它拉得很长。分母仍然是全部
+    # 模型的总和，所以百分比是「占全部用量」，落榜的那些只是不显示，不影响读数。
+    ranked_models = list(summary.get("top_models", []))
+    models = ranked_models[:TERMINAL_MODEL_ROWS]
+    model_grand = sum(value for _, value in ranked_models) or 1
 
     # 行号 -> (占比, 颜色)。两组条都以「占各自总量的比例」为长度，和同一行写的
     # 百分比是同一个数，避免出现「36% 却画满格」这种要靠猜的读法。

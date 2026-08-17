@@ -353,7 +353,9 @@ def aggregate(events: list[dict[str, Any]]) -> tuple[dict[str, dict[str, Any]], 
         "cache_write_tokens": sum(row["cache_write_tokens"] for row in ordered.values()),
         "active_days": len(ordered), "sessions": len(sessions),
         "turns": sum(row["turns"] for row in ordered.values()),
-        "top_models": model_counts.most_common(8), "top_providers": provider_counts.most_common(8),
+        # 不截断：卡片自己决定显示几行，但百分比的分母必须是全部模型，否则算出来
+        # 的是「占前 N 名的比例」而不是「占全部用量的比例」
+        "top_models": model_counts.most_common(), "top_providers": provider_counts.most_common(8),
         "sources": dict(source_counts), "first_date": next(iter(ordered), None),
         "last_date": next(reversed(ordered), None),
         "hours": hours, "weekdays": weekdays,
@@ -555,7 +557,7 @@ def merge_backfill(daily: dict[str, dict[str, Any]], summary: dict[str, Any],
     for row in ordered.values():
         models.update(row["models"])
         sources.update(row["sources"])
-    summary["top_models"] = models.most_common(8)
+    summary["top_models"] = models.most_common()  # 全量，理由同 aggregate
     summary["sources"] = dict(sources)
 
     # 回填的 token 一定来自 claude-code，并进分工具明细。这里用回填时单独攒的
