@@ -941,33 +941,33 @@
     "2026-08-17": {
       "date": "2026-08-17",
       "sources": {
-        "claude-code": 42712023,
-        "codex": 69105493
+        "claude-code": 47646386,
+        "codex": 71425959
       },
       "models": {
-        "claude-opus-5": 29482016,
+        "claude-opus-5": 34416379,
         "glm-5.3": 13230007,
-        "gpt-5.6-luna": 5698834,
+        "gpt-5.6-luna": 8019300,
         "gpt-5.6-sol": 63406659
       },
       "sessions": 5,
-      "turns": 791,
-      "input_tokens": 69059758,
-      "output_tokens": 737496,
-      "cache_read_tokens": 108282674,
-      "cache_write_tokens": 454260,
-      "total_tokens": 111817516
+      "turns": 822,
+      "input_tokens": 71375784,
+      "output_tokens": 755920,
+      "cache_read_tokens": 115481396,
+      "cache_write_tokens": 472493,
+      "total_tokens": 119072345
     }
   },
   "summary": {
-    "total_tokens": 7284762770,
-    "input_tokens": 3966290670,
-    "output_tokens": 34149268,
-    "cache_read_tokens": 6485699846,
-    "cache_write_tokens": 64520934,
+    "total_tokens": 7292017599,
+    "input_tokens": 3968606696,
+    "output_tokens": 34167692,
+    "cache_read_tokens": 6492898568,
+    "cache_write_tokens": 64539167,
     "active_days": 53,
     "sessions": 297,
-    "turns": 48083,
+    "turns": 48114,
     "top_models": [
       [
         "gpt-5.6-sol",
@@ -975,7 +975,7 @@
       ],
       [
         "claude-opus-5",
-        2239786439
+        2244720802
       ],
       [
         "glm-5.2",
@@ -1005,11 +1005,11 @@
     "top_providers": [
       [
         "claude-code",
-        3902222085
+        3907156448
       ],
       [
         "openai",
-        3061892099
+        3064212565
       ],
       [
         "yuanheng",
@@ -1025,8 +1025,8 @@
       ]
     ],
     "sources": {
-      "codex": 3382540685,
-      "claude-code": 3902222085
+      "codex": 3384861151,
+      "claude-code": 3907156448
     },
     "first_date": "2026-06-12",
     "last_date": "2026-08-17"
