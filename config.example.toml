@@ -1,0 +1,15 @@
+[profile]
+title = "AI Coding Contribution Profile"
+subtitle = "Claude Code + Codex"
+timezone = "Asia/Shanghai"
+window_days = 365
+
+[paths]
+claude_glob = "/datb/home/zhangfang/.claude/projects/**/*.jsonl"
+codex_homes = [
+  "/datb/home/zhangfang/.codex",
+  "/datb/home/zhangfang/.local/state/agent-config/codex/*",
+]
+cache_db = "data/profile.sqlite"
+daily_ledger = "data/daily.jsonl"
+output_dir = "dist"

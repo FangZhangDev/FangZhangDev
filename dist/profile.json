@@ -1,0 +1,1034 @@
+{
+  "daily": {
+    "2026-06-12": {
+      "date": "2026-06-12",
+      "sources": {
+        "codex": 8248916
+      },
+      "models": {
+        "gpt-5.5": 8248916
+      },
+      "sessions": 3,
+      "turns": 102,
+      "input_tokens": 8176013,
+      "output_tokens": 72903,
+      "cache_read_tokens": 7640320,
+      "cache_write_tokens": 0,
+      "total_tokens": 8248916
+    },
+    "2026-06-15": {
+      "date": "2026-06-15",
+      "sources": {
+        "codex": 38833171
+      },
+      "models": {
+        "gpt-5.5": 38833171
+      },
+      "sessions": 3,
+      "turns": 331,
+      "input_tokens": 38653297,
+      "output_tokens": 179874,
+      "cache_read_tokens": 36612224,
+      "cache_write_tokens": 0,
+      "total_tokens": 38833171
+    },
+    "2026-06-16": {
+      "date": "2026-06-16",
+      "sources": {
+        "codex": 1140348
+      },
+      "models": {
+        "gpt-5.5": 1140348
+      },
+      "sessions": 2,
+      "turns": 25,
+      "input_tokens": 1124821,
+      "output_tokens": 15527,
+      "cache_read_tokens": 934272,
+      "cache_write_tokens": 0,
+      "total_tokens": 1140348
+    },
+    "2026-06-17": {
+      "date": "2026-06-17",
+      "sources": {
+        "codex": 6918912
+      },
+      "models": {
+        "gpt-5.5": 6918912
+      },
+      "sessions": 1,
+      "turns": 80,
+      "input_tokens": 6874998,
+      "output_tokens": 43914,
+      "cache_read_tokens": 6497280,
+      "cache_write_tokens": 0,
+      "total_tokens": 6918912
+    },
+    "2026-06-18": {
+      "date": "2026-06-18",
+      "sources": {
+        "codex": 12384414
+      },
+      "models": {
+        "gpt-5.5": 12384414
+      },
+      "sessions": 1,
+      "turns": 79,
+      "input_tokens": 12336617,
+      "output_tokens": 47797,
+      "cache_read_tokens": 10625152,
+      "cache_write_tokens": 0,
+      "total_tokens": 12384414
+    },
+    "2026-06-20": {
+      "date": "2026-06-20",
+      "sources": {
+        "codex": 24052130
+      },
+      "models": {
+        "gpt-5.5": 24052130
+      },
+      "sessions": 1,
+      "turns": 211,
+      "input_tokens": 23866865,
+      "output_tokens": 185265,
+      "cache_read_tokens": 21235328,
+      "cache_write_tokens": 0,
+      "total_tokens": 24052130
+    },
+    "2026-06-22": {
+      "date": "2026-06-22",
+      "sources": {
+        "codex": 8843955
+      },
+      "models": {
+        "gpt-5.5": 8843955
+      },
+      "sessions": 1,
+      "turns": 57,
+      "input_tokens": 8774946,
+      "output_tokens": 69009,
+      "cache_read_tokens": 8024448,
+      "cache_write_tokens": 0,
+      "total_tokens": 8843955
+    },
+    "2026-06-23": {
+      "date": "2026-06-23",
+      "sources": {
+        "codex": 428807
+      },
+      "models": {
+        "gpt-5.5": 428807
+      },
+      "sessions": 1,
+      "turns": 9,
+      "input_tokens": 423185,
+      "output_tokens": 5622,
+      "cache_read_tokens": 305536,
+      "cache_write_tokens": 0,
+      "total_tokens": 428807
+    },
+    "2026-06-24": {
+      "date": "2026-06-24",
+      "sources": {
+        "codex": 12659300
+      },
+      "models": {
+        "gpt-5.5": 12659300
+      },
+      "sessions": 2,
+      "turns": 115,
+      "input_tokens": 12564887,
+      "output_tokens": 94413,
+      "cache_read_tokens": 11503744,
+      "cache_write_tokens": 0,
+      "total_tokens": 12659300
+    },
+    "2026-06-25": {
+      "date": "2026-06-25",
+      "sources": {
+        "codex": 7879488
+      },
+      "models": {
+        "gpt-5.5": 7879488
+      },
+      "sessions": 1,
+      "turns": 53,
+      "input_tokens": 7849234,
+      "output_tokens": 30254,
+      "cache_read_tokens": 7285632,
+      "cache_write_tokens": 0,
+      "total_tokens": 7879488
+    },
+    "2026-06-26": {
+      "date": "2026-06-26",
+      "sources": {
+        "codex": 3060850
+      },
+      "models": {
+        "gpt-5.5": 3060850
+      },
+      "sessions": 1,
+      "turns": 33,
+      "input_tokens": 3034997,
+      "output_tokens": 25853,
+      "cache_read_tokens": 2597248,
+      "cache_write_tokens": 0,
+      "total_tokens": 3060850
+    },
+    "2026-06-27": {
+      "date": "2026-06-27",
+      "sources": {
+        "codex": 2514482
+      },
+      "models": {
+        "gpt-5.5": 2514482
+      },
+      "sessions": 1,
+      "turns": 28,
+      "input_tokens": 2490700,
+      "output_tokens": 23782,
+      "cache_read_tokens": 2251776,
+      "cache_write_tokens": 0,
+      "total_tokens": 2514482
+    },
+    "2026-06-28": {
+      "date": "2026-06-28",
+      "sources": {
+        "codex": 3110429
+      },
+      "models": {
+        "gpt-5.5": 3110429
+      },
+      "sessions": 1,
+      "turns": 33,
+      "input_tokens": 3088871,
+      "output_tokens": 21558,
+      "cache_read_tokens": 2775936,
+      "cache_write_tokens": 0,
+      "total_tokens": 3110429
+    },
+    "2026-06-29": {
+      "date": "2026-06-29",
+      "sources": {
+        "codex": 18170532
+      },
+      "models": {
+        "gpt-5.5": 18170532
+      },
+      "sessions": 1,
+      "turns": 129,
+      "input_tokens": 18096317,
+      "output_tokens": 74215,
+      "cache_read_tokens": 17817344,
+      "cache_write_tokens": 0,
+      "total_tokens": 18170532
+    },
+    "2026-06-30": {
+      "date": "2026-06-30",
+      "sources": {
+        "codex": 1592558
+      },
+      "models": {
+        "gpt-5.5": 1592558
+      },
+      "sessions": 1,
+      "turns": 26,
+      "input_tokens": 1576976,
+      "output_tokens": 15582,
+      "cache_read_tokens": 1362688,
+      "cache_write_tokens": 0,
+      "total_tokens": 1592558
+    },
+    "2026-07-03": {
+      "date": "2026-07-03",
+      "sources": {
+        "codex": 1353022
+      },
+      "models": {
+        "gpt-5.5": 1353022
+      },
+      "sessions": 1,
+      "turns": 17,
+      "input_tokens": 1341563,
+      "output_tokens": 11459,
+      "cache_read_tokens": 1226496,
+      "cache_write_tokens": 0,
+      "total_tokens": 1353022
+    },
+    "2026-07-04": {
+      "date": "2026-07-04",
+      "sources": {
+        "codex": 1346528
+      },
+      "models": {
+        "gpt-5.5": 1346528
+      },
+      "sessions": 1,
+      "turns": 9,
+      "input_tokens": 1340713,
+      "output_tokens": 5815,
+      "cache_read_tokens": 1032960,
+      "cache_write_tokens": 0,
+      "total_tokens": 1346528
+    },
+    "2026-07-05": {
+      "date": "2026-07-05",
+      "sources": {
+        "codex": 20188915
+      },
+      "models": {
+        "gpt-5.5": 20188915
+      },
+      "sessions": 1,
+      "turns": 108,
+      "input_tokens": 20130175,
+      "output_tokens": 58740,
+      "cache_read_tokens": 19853312,
+      "cache_write_tokens": 0,
+      "total_tokens": 20188915
+    },
+    "2026-07-10": {
+      "date": "2026-07-10",
+      "sources": {
+        "codex": 2393614
+      },
+      "models": {
+        "gpt-5.5": 2393614
+      },
+      "sessions": 1,
+      "turns": 24,
+      "input_tokens": 2366974,
+      "output_tokens": 26640,
+      "cache_read_tokens": 2006528,
+      "cache_write_tokens": 0,
+      "total_tokens": 2393614
+    },
+    "2026-07-11": {
+      "date": "2026-07-11",
+      "sources": {
+        "codex": 7304757
+      },
+      "models": {
+        "gpt-5.5": 1463779,
+        "gpt-5.6-sol": 5840978
+      },
+      "sessions": 2,
+      "turns": 62,
+      "input_tokens": 7267211,
+      "output_tokens": 37546,
+      "cache_read_tokens": 6737792,
+      "cache_write_tokens": 0,
+      "total_tokens": 7304757
+    },
+    "2026-07-13": {
+      "date": "2026-07-13",
+      "sources": {
+        "claude-code": 72571440
+      },
+      "models": {
+        "astron-code-latest": 24344286,
+        "glm-5.2": 48227154
+      },
+      "sessions": 3,
+      "turns": 633,
+      "input_tokens": 25465814,
+      "output_tokens": 514074,
+      "cache_read_tokens": 46591552,
+      "cache_write_tokens": 0,
+      "total_tokens": 72571440
+    },
+    "2026-07-14": {
+      "date": "2026-07-14",
+      "sources": {
+        "claude-code": 254815341,
+        "codex": 107706032
+      },
+      "models": {
+        "astron-code-latest": 32636387,
+        "glm-5.2": 222178954,
+        "gpt-5.6-sol": 107706032
+      },
+      "sessions": 13,
+      "turns": 1815,
+      "input_tokens": 165927158,
+      "output_tokens": 1665575,
+      "cache_read_tokens": 298495488,
+      "cache_write_tokens": 0,
+      "total_tokens": 362521373
+    },
+    "2026-07-15": {
+      "date": "2026-07-15",
+      "sources": {
+        "claude-code": 105049146,
+        "codex": 1096042033
+      },
+      "models": {
+        "astron-code-latest": 14050438,
+        "glm-5.2": 90998708,
+        "gpt-5.6-sol": 1078796974,
+        "gpt-5.6-terra": 17245059
+      },
+      "sessions": 43,
+      "turns": 9548,
+      "input_tokens": 1134976867,
+      "output_tokens": 3298376,
+      "cache_read_tokens": 1129815744,
+      "cache_write_tokens": 0,
+      "total_tokens": 1201091179
+    },
+    "2026-07-16": {
+      "date": "2026-07-16",
+      "sources": {
+        "claude-code": 22477586,
+        "codex": 32220900
+      },
+      "models": {
+        "astron-code-latest": 22477586,
+        "gpt-5.6-sol": 32220900
+      },
+      "sessions": 10,
+      "turns": 581,
+      "input_tokens": 54445230,
+      "output_tokens": 253256,
+      "cache_read_tokens": 30605824,
+      "cache_write_tokens": 0,
+      "total_tokens": 54698486
+    },
+    "2026-07-17": {
+      "date": "2026-07-17",
+      "sources": {
+        "claude-code": 48767035
+      },
+      "models": {
+        "astron-code-latest": 44942617,
+        "glm-5.2": 3824418
+      },
+      "sessions": 3,
+      "turns": 299,
+      "input_tokens": 46096005,
+      "output_tokens": 115894,
+      "cache_read_tokens": 2555136,
+      "cache_write_tokens": 0,
+      "total_tokens": 48767035
+    },
+    "2026-07-18": {
+      "date": "2026-07-18",
+      "sources": {
+        "claude-code": 21431092,
+        "codex": 4404902
+      },
+      "models": {
+        "astron-code-latest": 21431092,
+        "gpt-5.6-sol": 4404902
+      },
+      "sessions": 4,
+      "turns": 271,
+      "input_tokens": 25718908,
+      "output_tokens": 117086,
+      "cache_read_tokens": 3960832,
+      "cache_write_tokens": 0,
+      "total_tokens": 25835994
+    },
+    "2026-07-19": {
+      "date": "2026-07-19",
+      "sources": {
+        "claude-code": 4465251,
+        "codex": 272801
+      },
+      "models": {
+        "astron-code-latest": 4465251,
+        "gpt-5.6-sol": 272801
+      },
+      "sessions": 3,
+      "turns": 66,
+      "input_tokens": 4723630,
+      "output_tokens": 14422,
+      "cache_read_tokens": 212224,
+      "cache_write_tokens": 0,
+      "total_tokens": 4738052
+    },
+    "2026-07-20": {
+      "date": "2026-07-20",
+      "sources": {
+        "claude-code": 45052549,
+        "codex": 561171405
+      },
+      "models": {
+        "astron-code-latest": 44583160,
+        "doubao-seed-code": 78124,
+        "glm-5.2": 391265,
+        "gpt-5.6-sol": 561171405
+      },
+      "sessions": 20,
+      "turns": 5944,
+      "input_tokens": 604535418,
+      "output_tokens": 1387944,
+      "cache_read_tokens": 545727792,
+      "cache_write_tokens": 0,
+      "total_tokens": 606223954
+    },
+    "2026-07-21": {
+      "date": "2026-07-21",
+      "sources": {
+        "claude-code": 4146592,
+        "codex": 75004643
+      },
+      "models": {
+        "astron-code-latest": 4146592,
+        "gpt-5.6-luna": 2022538,
+        "gpt-5.6-sol": 66736761,
+        "gpt-5.6-terra": 6245344
+      },
+      "sessions": 32,
+      "turns": 773,
+      "input_tokens": 78904949,
+      "output_tokens": 246286,
+      "cache_read_tokens": 71995648,
+      "cache_write_tokens": 0,
+      "total_tokens": 79151235
+    },
+    "2026-07-22": {
+      "date": "2026-07-22",
+      "sources": {
+        "claude-code": 2640199,
+        "codex": 94443082
+      },
+      "models": {
+        "astron-code-latest": 2640199,
+        "codex-auto-review": 958945,
+        "gpt-5.6-sol": 93484137
+      },
+      "sessions": 7,
+      "turns": 877,
+      "input_tokens": 96786957,
+      "output_tokens": 296324,
+      "cache_read_tokens": 90760192,
+      "cache_write_tokens": 0,
+      "total_tokens": 97083281
+    },
+    "2026-07-23": {
+      "date": "2026-07-23",
+      "sources": {
+        "claude-code": 7151879,
+        "codex": 234335448
+      },
+      "models": {
+        "astron-code-latest": 7151879,
+        "codex-auto-review": 222291,
+        "gpt-5.6-sol": 234113157
+      },
+      "sessions": 8,
+      "turns": 1778,
+      "input_tokens": 240907361,
+      "output_tokens": 579966,
+      "cache_read_tokens": 228026752,
+      "cache_write_tokens": 0,
+      "total_tokens": 241487327
+    },
+    "2026-07-24": {
+      "date": "2026-07-24",
+      "sources": {
+        "claude-code": 398595003,
+        "codex": 60823404
+      },
+      "models": {
+        "astron-code-latest": 72911226,
+        "codex-auto-review": 67834,
+        "glm-5.2": 325683777,
+        "gpt-5.6-sol": 60755570
+      },
+      "sessions": 17,
+      "turns": 2762,
+      "input_tokens": 162526584,
+      "output_tokens": 3746671,
+      "cache_read_tokens": 349233600,
+      "cache_write_tokens": 0,
+      "total_tokens": 459418407
+    },
+    "2026-07-25": {
+      "date": "2026-07-25",
+      "sources": {
+        "claude-code": 261808047
+      },
+      "models": {
+        "astron-code-latest": 51461317,
+        "claude-haiku-4-5-20251001": 132220,
+        "claude-opus-4-8": 1772244,
+        "claude-opus-5": 190389361,
+        "claude-sonnet-5": 182628,
+        "glm-5.2": 17870277
+      },
+      "sessions": 11,
+      "turns": 1350,
+      "input_tokens": 51919955,
+      "output_tokens": 1731585,
+      "cache_read_tokens": 194670429,
+      "cache_write_tokens": 13486078,
+      "total_tokens": 261808047
+    },
+    "2026-07-26": {
+      "date": "2026-07-26",
+      "sources": {
+        "claude-code": 181252323,
+        "codex": 38798687
+      },
+      "models": {
+        "astron-code-latest": 11148388,
+        "claude-opus-5": 168674904,
+        "codex-auto-review": 1813614,
+        "glm-5.2": 1429031,
+        "gpt-5.6-sol": 36985073
+      },
+      "sessions": 9,
+      "turns": 1157,
+      "input_tokens": 49816375,
+      "output_tokens": 1132827,
+      "cache_read_tokens": 205317514,
+      "cache_write_tokens": 1140326,
+      "total_tokens": 220051010
+    },
+    "2026-07-27": {
+      "date": "2026-07-27",
+      "sources": {
+        "claude-code": 209692123,
+        "codex": 47443847
+      },
+      "models": {
+        "astron-code-latest": 44176753,
+        "claude-opus-5": 111569138,
+        "codex-auto-review": 1959414,
+        "deepseek-v4-pro": 20517,
+        "glm-5.2": 53946232,
+        "gpt-5.6-sol": 45463916
+      },
+      "sessions": 19,
+      "turns": 1994,
+      "input_tokens": 92617202,
+      "output_tokens": 1910231,
+      "cache_read_tokens": 206123630,
+      "cache_write_tokens": 1901739,
+      "total_tokens": 257135970
+    },
+    "2026-07-28": {
+      "date": "2026-07-28",
+      "sources": {
+        "claude-code": 192517047,
+        "codex": 30139900
+      },
+      "models": {
+        "astron-code-latest": 20755724,
+        "claude-opus-5": 171761323,
+        "gpt-5.6-sol": 30139900
+      },
+      "sessions": 3,
+      "turns": 938,
+      "input_tokens": 50649727,
+      "output_tokens": 1236842,
+      "cache_read_tokens": 195735718,
+      "cache_write_tokens": 3594532,
+      "total_tokens": 222656947
+    },
+    "2026-07-29": {
+      "date": "2026-07-29",
+      "sources": {
+        "claude-code": 94590892,
+        "codex": 130923032
+      },
+      "models": {
+        "astron-code-latest": 20082679,
+        "claude-opus-5": 74508213,
+        "codex-auto-review": 6874459,
+        "gpt-5.6-sol": 124048573
+      },
+      "sessions": 5,
+      "turns": 1258,
+      "input_tokens": 150582716,
+      "output_tokens": 620124,
+      "cache_read_tokens": 196696080,
+      "cache_write_tokens": 4106396,
+      "total_tokens": 225513924
+    },
+    "2026-07-30": {
+      "date": "2026-07-30",
+      "sources": {
+        "claude-code": 24954152,
+        "codex": 48187306
+      },
+      "models": {
+        "astron-code-latest": 24954152,
+        "codex-auto-review": 2979679,
+        "gpt-5.6-sol": 45207627
+      },
+      "sessions": 3,
+      "turns": 523,
+      "input_tokens": 72891335,
+      "output_tokens": 250123,
+      "cache_read_tokens": 46177024,
+      "cache_write_tokens": 0,
+      "total_tokens": 73141458
+    },
+    "2026-07-31": {
+      "date": "2026-07-31",
+      "sources": {
+        "claude-code": 15538639
+      },
+      "models": {
+        "astron-code-latest": 15538639
+      },
+      "sessions": 1,
+      "turns": 91,
+      "input_tokens": 15513446,
+      "output_tokens": 25193,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "total_tokens": 15538639
+    },
+    "2026-08-02": {
+      "date": "2026-08-02",
+      "sources": {
+        "claude-code": 15223681,
+        "codex": 62148759
+      },
+      "models": {
+        "astron-code-latest": 671932,
+        "claude-opus-5": 4834862,
+        "glm-5.2": 9716887,
+        "gpt-5.6-sol": 62148759
+      },
+      "sessions": 4,
+      "turns": 587,
+      "input_tokens": 62923049,
+      "output_tokens": 361160,
+      "cache_read_tokens": 74481298,
+      "cache_write_tokens": 266901,
+      "total_tokens": 77372440
+    },
+    "2026-08-03": {
+      "date": "2026-08-03",
+      "sources": {
+        "claude-code": 127239005,
+        "codex": 39931991
+      },
+      "models": {
+        "astron-code-latest": 1319942,
+        "claude-opus-5": 101195324,
+        "codex-auto-review": 155773,
+        "glm-5.2": 24723739,
+        "gpt-5.6-sol": 39776218
+      },
+      "sessions": 11,
+      "turns": 1311,
+      "input_tokens": 44538751,
+      "output_tokens": 1228276,
+      "cache_read_tokens": 158870728,
+      "cache_write_tokens": 803449,
+      "total_tokens": 167170996
+    },
+    "2026-08-04": {
+      "date": "2026-08-04",
+      "sources": {
+        "claude-code": 202931106,
+        "codex": 124011146
+      },
+      "models": {
+        "claude-opus-5": 73509438,
+        "codex-auto-review": 792018,
+        "deepseek-v4-flash": 14948903,
+        "glm-5.2": 129421668,
+        "gpt-5.6-sol": 108270225
+      },
+      "sessions": 29,
+      "turns": 2409,
+      "input_tokens": 130826869,
+      "output_tokens": 2794874,
+      "cache_read_tokens": 309377364,
+      "cache_write_tokens": 5139049,
+      "total_tokens": 326942252
+    },
+    "2026-08-05": {
+      "date": "2026-08-05",
+      "sources": {
+        "claude-code": 102870068,
+        "codex": 9377038
+      },
+      "models": {
+        "claude-opus-5": 57007935,
+        "claude-sonnet-5": 101037,
+        "deepseek-v4-flash": 9377038,
+        "glm-5.2": 45761096
+      },
+      "sessions": 11,
+      "turns": 754,
+      "input_tokens": 12279522,
+      "output_tokens": 1046778,
+      "cache_read_tokens": 105467204,
+      "cache_write_tokens": 2515106,
+      "total_tokens": 112247106
+    },
+    "2026-08-06": {
+      "date": "2026-08-06",
+      "sources": {
+        "claude-code": 27025312
+      },
+      "models": {
+        "claude-opus-5": 8273929,
+        "glm-5.2": 18751383
+      },
+      "sessions": 2,
+      "turns": 213,
+      "input_tokens": 705062,
+      "output_tokens": 261777,
+      "cache_read_tokens": 25293667,
+      "cache_write_tokens": 764806,
+      "total_tokens": 27025312
+    },
+    "2026-08-08": {
+      "date": "2026-08-08",
+      "sources": {
+        "claude-code": 261173223
+      },
+      "models": {
+        "claude-opus-5": 261173223
+      },
+      "sessions": 1,
+      "turns": 779,
+      "input_tokens": 1445,
+      "output_tokens": 784599,
+      "cache_read_tokens": 254914614,
+      "cache_write_tokens": 5472565,
+      "total_tokens": 261173223
+    },
+    "2026-08-09": {
+      "date": "2026-08-09",
+      "sources": {
+        "claude-code": 64250172,
+        "codex": 142942701
+      },
+      "models": {
+        "claude-opus-5": 63176283,
+        "codex-auto-review": 1812136,
+        "glm-5.2": 1073889,
+        "gpt-5.6-sol": 141130565
+      },
+      "sessions": 15,
+      "turns": 1568,
+      "input_tokens": 142546153,
+      "output_tokens": 819921,
+      "cache_read_tokens": 197007852,
+      "cache_write_tokens": 3950851,
+      "total_tokens": 207192873
+    },
+    "2026-08-11": {
+      "date": "2026-08-11",
+      "sources": {
+        "claude-code": 11882357,
+        "codex": 45790719
+      },
+      "models": {
+        "codex-auto-review": 1661149,
+        "glm-5.2": 11882357,
+        "gpt-5.6-sol": 44129570
+      },
+      "sessions": 4,
+      "turns": 442,
+      "input_tokens": 46029871,
+      "output_tokens": 400197,
+      "cache_read_tokens": 54944512,
+      "cache_write_tokens": 0,
+      "total_tokens": 57673076
+    },
+    "2026-08-12": {
+      "date": "2026-08-12",
+      "sources": {
+        "claude-code": 19059886
+      },
+      "models": {
+        "astron-code-latest": 98544,
+        "claude-opus-5": 14549826,
+        "glm-5.2": 4411516
+      },
+      "sessions": 6,
+      "turns": 246,
+      "input_tokens": 444382,
+      "output_tokens": 273983,
+      "cache_read_tokens": 17954610,
+      "cache_write_tokens": 386911,
+      "total_tokens": 19059886
+    },
+    "2026-08-13": {
+      "date": "2026-08-13",
+      "sources": {
+        "claude-code": 123920169,
+        "codex": 3392552
+      },
+      "models": {
+        "claude-opus-5": 88279996,
+        "deepseek-v4-flash": 3392552,
+        "glm-5.2": 35640173
+      },
+      "sessions": 4,
+      "turns": 840,
+      "input_tokens": 4382639,
+      "output_tokens": 1142561,
+      "cache_read_tokens": 123650932,
+      "cache_write_tokens": 1413645,
+      "total_tokens": 127312721
+    },
+    "2026-08-14": {
+      "date": "2026-08-14",
+      "sources": {
+        "claude-code": 761325028,
+        "codex": 15733520
+      },
+      "models": {
+        "astron-code-latest": 1981463,
+        "claude-opus-5": 686412236,
+        "deepseek-v4-flash": 3410828,
+        "glm-5.2": 72931329,
+        "gpt-5.6-sol": 12322692
+      },
+      "sessions": 9,
+      "turns": 2035,
+      "input_tokens": 19973005,
+      "output_tokens": 2712199,
+      "cache_read_tokens": 750701069,
+      "cache_write_tokens": 16964399,
+      "total_tokens": 777058548
+    },
+    "2026-08-15": {
+      "date": "2026-08-15",
+      "sources": {
+        "claude-code": 166154604,
+        "codex": 8545950
+      },
+      "models": {
+        "claude-haiku-4-5-20251001": 664197,
+        "claude-opus-5": 130029997,
+        "codex-auto-review": 143804,
+        "glm-5.3": 35460410,
+        "gpt-5.6-sol": 8402146
+      },
+      "sessions": 8,
+      "turns": 1055,
+      "input_tokens": 8967173,
+      "output_tokens": 978648,
+      "cache_read_tokens": 170923572,
+      "cache_write_tokens": 1834617,
+      "total_tokens": 174700554
+    },
+    "2026-08-16": {
+      "date": "2026-08-16",
+      "sources": {
+        "claude-code": 8939115,
+        "codex": 117218266
+      },
+      "models": {
+        "astron-code-latest": 93430,
+        "claude-opus-5": 4958435,
+        "codex-auto-review": 178443,
+        "glm-5.3": 3887250,
+        "gpt-5.6-sol": 117039823
+      },
+      "sessions": 11,
+      "turns": 864,
+      "input_tokens": 117227994,
+      "output_tokens": 418232,
+      "cache_read_tokens": 122802555,
+      "cache_write_tokens": 325304,
+      "total_tokens": 126157381
+    },
+    "2026-08-17": {
+      "date": "2026-08-17",
+      "sources": {
+        "claude-code": 42712023,
+        "codex": 69105493
+      },
+      "models": {
+        "claude-opus-5": 29482016,
+        "glm-5.3": 13230007,
+        "gpt-5.6-luna": 5698834,
+        "gpt-5.6-sol": 63406659
+      },
+      "sessions": 5,
+      "turns": 791,
+      "input_tokens": 69059758,
+      "output_tokens": 737496,
+      "cache_read_tokens": 108282674,
+      "cache_write_tokens": 454260,
+      "total_tokens": 111817516
+    }
+  },
+  "summary": {
+    "total_tokens": 7284762770,
+    "input_tokens": 3966290670,
+    "output_tokens": 34149268,
+    "cache_read_tokens": 6485699846,
+    "cache_write_tokens": 64520934,
+    "active_days": 53,
+    "sessions": 297,
+    "turns": 48083,
+    "top_models": [
+      [
+        "gpt-5.6-sol",
+        3123975363
+      ],
+      [
+        "claude-opus-5",
+        2239786439
+      ],
+      [
+        "glm-5.2",
+        1118863853
+      ],
+      [
+        "astron-code-latest",
+        488063676
+      ],
+      [
+        "gpt-5.5",
+        176584150
+      ],
+      [
+        "glm-5.3",
+        52577667
+      ],
+      [
+        "deepseek-v4-flash",
+        31129321
+      ],
+      [
+        "gpt-5.6-terra",
+        23490403
+      ]
+    ],
+    "top_providers": [
+      [
+        "claude-code",
+        3902222085
+      ],
+      [
+        "openai",
+        3061892099
+      ],
+      [
+        "yuanheng",
+        243034748
+      ],
+      [
+        "aoligei",
+        46464000
+      ],
+      [
+        "deepseek",
+        31149838
+      ]
+    ],
+    "sources": {
+      "codex": 3382540685,
+      "claude-code": 3902222085
+    },
+    "first_date": "2026-06-12",
+    "last_date": "2026-08-17"
+  }
+}
