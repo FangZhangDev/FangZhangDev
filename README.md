@@ -1,4 +1,4 @@
-<h1 align="center">Vibe coding activity</h1>
+<h1 align="center">Vibe Coding activity</h1>
 
 <!-- profile:gallery:begin -->
 <p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://cdn.jsdelivr.net/gh/FangZhangDev/FangZhangDev@7d9d81a6a0b44639965d4616fef307a2a99c812c/dist/calendar-dark.svg?v=6dee690e"><source media="(prefers-color-scheme: light)" srcset="https://cdn.jsdelivr.net/gh/FangZhangDev/FangZhangDev@7d9d81a6a0b44639965d4616fef307a2a99c812c/dist/calendar-light.svg?v=922ba4eb"><img alt="Prompt calendar" src="https://cdn.jsdelivr.net/gh/FangZhangDev/FangZhangDev@7d9d81a6a0b44639965d4616fef307a2a99c812c/dist/calendar-light.svg?v=922ba4eb" width="880"></picture></p>
