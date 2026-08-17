@@ -1,4 +1,12 @@
-# AI Coding Contribution Profile
+# FangZhangDev's AI Coding Profile
+
+![AI Coding Contribution Profile](./dist/profile.svg)
+
+This is a long-term public record of my Claude Code and Codex activity, starting in 2026.
+
+The daily profile is generated from local usage metadata and intentionally excludes prompts, source paths, credentials, raw transcripts, and repository names.
+
+## Project
 
 This project turns local Claude Code and Codex activity into a long-lived, public-safe profile:
 
