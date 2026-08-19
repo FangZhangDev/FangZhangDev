@@ -1117,31 +1117,32 @@
       "date": "2026-08-19",
       "sources": {
         "claude-code": 30052117,
-        "codex": 7128866,
-        "dsh": 5225385
+        "codex": 10257658,
+        "dsh": 64638199
       },
       "models": {
-        "deepseek-v4-flash": 12354251,
-        "glm-5.2": 30052117
+        "deepseek-v4-flash": 61196410,
+        "deepseek-v4-pro": 3376093,
+        "glm-5.2": 40375471
       },
-      "sessions": 10,
-      "turns": 574,
-      "input_tokens": 8071968,
-      "output_tokens": 320576,
-      "cache_read_tokens": 40864768,
+      "sessions": 55,
+      "turns": 1223,
+      "input_tokens": 12554315,
+      "output_tokens": 878779,
+      "cache_read_tokens": 101319680,
       "cache_write_tokens": 0,
-      "total_tokens": 42406368
+      "total_tokens": 104947974
     }
   },
   "summary": {
-    "total_tokens": 9153042267,
-    "input_tokens": 3996949016,
-    "output_tokens": 37096760,
-    "cache_read_tokens": 7003033475,
+    "total_tokens": 9215583873,
+    "input_tokens": 4001431363,
+    "output_tokens": 37654963,
+    "cache_read_tokens": 7063488387,
     "cache_write_tokens": 69099497,
     "active_days": 61,
-    "sessions": 449,
-    "turns": 51450,
+    "sessions": 494,
+    "turns": 52099,
     "top_models": [
       [
         "gpt-5.6-sol",
@@ -1153,7 +1154,7 @@
       ],
       [
         "glm-5.2",
-        2186757959
+        2197081313
       ],
       [
         "astron-code-latest",
@@ -1164,16 +1165,16 @@
         176584150
       ],
       [
+        "deepseek-v4-flash",
+        102575157
+      ],
+      [
         "glm-5-2-260617",
         79697288
       ],
       [
         "glm-5.3",
         71778038
-      ],
-      [
-        "deepseek-v4-flash",
-        53732998
       ],
       [
         "gpt-5.6-terra",
@@ -1186,6 +1187,10 @@
       [
         "gpt-5.6-luna",
         16865969
+      ],
+      [
+        "deepseek-v4-pro",
+        3396610
       ],
       [
         "claude-opus-4-8",
@@ -1202,10 +1207,6 @@
       [
         "doubao-seed-code",
         78124
-      ],
-      [
-        "deepseek-v4-pro",
-        20517
       ]
     ],
     "top_providers": [
@@ -1222,22 +1223,26 @@
         243034748
       ],
       [
+        "deepseek-official",
+        54314845
+      ],
+      [
         "deepseek",
-        48528130
+        51656922
       ],
       [
         "aoligei",
         46825625
       ],
       [
-        "deepseek-official",
-        5225385
+        "qwen-token-plan-cn",
+        10323354
       ]
     ],
     "sources": {
-      "codex": 3409650738,
+      "codex": 3412779530,
       "claude-code": 5738166144,
-      "dsh": 5225385
+      "dsh": 64638199
     },
     "first_date": "2026-06-12",
     "last_date": "2026-08-19",
@@ -1260,17 +1265,17 @@
       4736,
       3125,
       4214,
-      2960,
-      7823,
-      2588,
-      2294,
+      2963,
+      8057,
+      2972,
+      2322,
       1766,
       923
     ],
     "weekdays": [
       13333,
       7087,
-      13452,
+      14101,
       4067,
       5363,
       3765,
@@ -1280,7 +1285,7 @@
       "codex": {
         "gpt-5.6-sol": 3124336988,
         "gpt-5.5": 176584150,
-        "deepseek-v4-flash": 48507613,
+        "deepseek-v4-flash": 51636405,
         "gpt-5.6-terra": 23490403,
         "codex-auto-review": 19845098,
         "gpt-5.6-luna": 16865969,
@@ -1297,7 +1302,9 @@
         "doubao-seed-code": 78124
       },
       "dsh": {
-        "deepseek-v4-flash": 5225385
+        "deepseek-v4-flash": 50938752,
+        "glm-5.2": 10323354,
+        "deepseek-v4-pro": 3376093
       }
     },
     "backfilled_days": 14,
@@ -1444,7 +1451,7 @@
       "2026-08-16": 31,
       "2026-08-17": 143,
       "2026-08-18": 22,
-      "2026-08-19": 25
+      "2026-08-19": 99
     },
     "prompt_calendar_by_source": {
       "claude-code": {
@@ -1585,7 +1592,7 @@
         "2026-08-16": 18,
         "2026-08-17": 95,
         "2026-08-18": 21,
-        "2026-08-19": 11
+        "2026-08-19": 12
       },
       "codex": {
         "2026-06-12": 20,
@@ -1638,17 +1645,17 @@
         "2026-08-16": 13,
         "2026-08-17": 48,
         "2026-08-18": 1,
-        "2026-08-19": 9
+        "2026-08-19": 15
       },
       "dsh": {
-        "2026-08-19": 5
+        "2026-08-19": 72
       }
     },
-    "prompt_total": 4129,
+    "prompt_total": 4203,
     "prompt_sources": {
-      "claude-code": 3196,
-      "codex": 928,
-      "dsh": 5
+      "claude-code": 3197,
+      "codex": 934,
+      "dsh": 72
     },
     "prompt_first": "2025-09-30",
     "calendar_spans": [
