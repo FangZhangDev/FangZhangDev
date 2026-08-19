@@ -21,6 +21,8 @@ codex_homes = [
   "~/.codex",
   "~/.local/state/agent-config/codex/*",
 ]
+# dsh（DeepSeek Harness）会话文件：zstd 压缩的 JSONL，含每步 token 与模型信息
+dsh_glob = "~/.dsh/sessions/**/session.jsonl.zstd"
 # 会话记录被 cleanupPeriodDays 清掉后，聚合缓存仍留着更早的每日 token
 claude_stats_cache = "~/.claude/stats-cache.json"
 
@@ -30,6 +32,8 @@ prompt_histories = [
   { source = "claude-code", glob = "~/.claude/history.jsonl" },
   { source = "codex", glob = "~/.codex/history.jsonl" },
   { source = "codex", glob = "~/.local/state/agent-config/codex/*/history.jsonl" },
+  # dsh 没有独立提示历史，源就是会话文件本身（user/message 事件）
+  { source = "dsh", glob = "~/.dsh/sessions/**/session.jsonl.zstd" },
 ]
 cache_db = "data/profile.sqlite"
 # 两份账本都只增不减，是这个项目唯一的长期归档：会话记录会被 cleanupPeriodDays

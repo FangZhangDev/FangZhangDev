@@ -6,7 +6,8 @@ documentation lives here instead.
 
 ## What it does
 
-Turns local Claude Code and Codex activity into a long-lived, public-safe profile:
+Turns local Claude Code, Codex and dsh (DeepSeek Harness) activity into a long-lived,
+public-safe profile:
 
 - normalized daily usage records suitable for a public Git repository;
 - SVG cards in light and dark variants: the README carries a prompt calendar and a terminal
@@ -48,6 +49,7 @@ asset_cdn = "jsdelivr"       # "jsdelivr" (proxied by camo, 8-day cache) or "raw
 [paths]
 claude_glob  = "~/.claude/projects/**/*.jsonl"
 codex_homes  = ["~/.codex", "~/.local/state/agent-config/codex/*"]
+dsh_glob     = "~/.dsh/sessions/**/session.jsonl.zstd"   # DeepSeek Harness 会话
 claude_stats_cache = "~/.claude/stats-cache.json"   # backfill, see below
 claude_history     = "~/.claude/history.jsonl"      # prompt calendar
 cache_db      = "data/profile.sqlite"  # local only, git-ignored
@@ -229,6 +231,30 @@ Because Codex has no aggregate cache to fall back on, `data/daily.jsonl` is its 
 archive. That is why `write_ledger` merges rather than overwrites: a day already recorded survives
 even if its source file later disappears.
 
+### dsh
+
+dsh (DeepSeek Harness) stores each session as a zstd-compressed JSONL event stream at
+`~/.dsh/sessions/<project>/<session-id>/session.jsonl.zstd`. The collector decompresses it with
+the `zstandard` module when installed and falls back to the `zstd` binary otherwise, so the
+project still needs no third-party packages.
+
+One session file carries everything the profile needs, so it is listed both as a token source
+(`dsh_glob`) and as a prompt-history source (`prompt_histories` with `source = "dsh"`):
+
+- `assistant/message` events carry per-step `usage` (input / output / cache-read tokens) plus the
+  model and provider, one row per step — the same shape as a Claude transcript row;
+  `reasoningTokens` is folded into the output count;
+- `user/message` events with `source.kind = "user"` are the prompts you sent. Plugin-injected
+  context snapshots are `kind = "plugin"` and are not counted. dsh has no separate
+  `history.jsonl`, so the session files are the only prompt archive;
+- the session id comes from the leading `session` event, with the directory name as fallback.
+
+dsh has no cleanup setting today, but its files are written live: a session being recorded right
+now has an incomplete trailing frame. `zstd -dc` still returns the complete prefix, which is
+accepted; a file that cannot be decompressed at all is skipped and re-parsed on the next run,
+when its mtime has changed. Prompts are likewise safe to lose on a truncated read because
+`merge_prompt_ledger` keeps `max(archived, live)` per day and per tool.
+
 ### Stopping the loss
 
 Raise the retention period to stop losing data going forward:
@@ -245,7 +271,7 @@ Each row in `data/daily.jsonl`:
 | Field | Meaning |
 | --- | --- |
 | `date` | local calendar day |
-| `sources` | tokens per tool (`claude-code`, `codex`) |
+| `sources` | tokens per tool (`claude-code`, `codex`, `dsh`) |
 | `models` | tokens per model id |
 | `sessions` | distinct session count |
 | `turns` | assistant responses recorded |

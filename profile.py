@@ -61,6 +61,7 @@ class Config:
     asset_ref: str  # 覆盖 branch 的不可变引用，通常是 commit SHA
     claude_glob: str
     codex_homes: tuple[str, ...]
+    dsh_glob: str
     claude_stats_cache: str
     prompt_histories: tuple[tuple[str, str], ...]
     cache_db: Path
@@ -90,6 +91,7 @@ def load_config(path: Path) -> Config:
         asset_ref="",  # 只由 `profile.py pin --ref <sha>` 设置，不写进配置文件
         claude_glob=str(paths.get("claude_glob", "")),
         codex_homes=tuple(str(item) for item in paths.get("codex_homes", [])),
+        dsh_glob=str(paths.get("dsh_glob", "")),
         claude_stats_cache=str(paths.get("claude_stats_cache", "")),
         prompt_histories=tuple(
             (str(item.get("source", "unknown")), str(item.get("glob", "")))
@@ -249,6 +251,86 @@ def parse_codex(path: Path, timezone_name: str, metadata: tuple[str, str, str]) 
     return events
 
 
+def decompress_zstd(path: Path) -> str:
+    """把 dsh 的 zstd 会话文件解压成文本。
+
+    优先用 zstandard 模块（若已安装）；否则调用 `zstd -dc` 二进制，保持零第三方
+    依赖。会话文件是边写边刷的：尾部可能是不完整帧，zstd 此时退出码为 1，但完整
+    前缀仍会写到 stdout，照常接收（下次 mtime 变化会整文件重读）。
+    """
+    try:
+        import zstandard
+    except ModuleNotFoundError:
+        import subprocess
+        try:
+            proc = subprocess.run(["zstd", "-dc", str(path)], capture_output=True, text=True)
+        except OSError as exc:
+            raise RuntimeError(f"无法解压 zstd 文件（缺少 zstandard 模块或 zstd 命令） path={path}: {exc}") from exc
+        if proc.returncode not in (0, 1):
+            raise RuntimeError(f"zstd 解压失败 path={path} rc={proc.returncode} err={proc.stderr[:200]}")
+        return proc.stdout
+    with path.open("rb") as handle:
+        reader = zstandard.ZstdDecompressor().stream_reader(handle)
+        try:
+            return reader.read().decode("utf-8", errors="ignore")
+        except zstandard.ZstdError as exc:
+            raise RuntimeError(f"zstd 解压失败 path={path}: {exc}") from exc
+
+
+def parse_dsh(path: Path, timezone_name: str) -> list[tuple[Any, ...]]:
+    """解析 dsh（DeepSeek Harness）会话文件：zstd 压缩的 JSONL 事件流。
+
+    每条 `assistant/message` 事件都自带该步的 usage 与模型来源，和 Claude 的
+    transcript 一样按条成行，一条事件对应一行记录。reasoningTokens 并入
+    output_tokens（都是模型产出）；session id 取事件里的，兜底用目录名。
+    正在写入的不完整文件跳过，不报错。
+    """
+    try:
+        text = decompress_zstd(path)
+    except RuntimeError:
+        return []
+    session_id = path.parent.name
+    zone = ZoneInfo(timezone_name)
+    events: list[tuple[Any, ...]] = []
+    for line in text.splitlines():
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if row.get("type") == "session":
+            session_id = str(row.get("id") or session_id)
+            continue
+        if row.get("type") != "assistant/message":
+            continue
+        data = row.get("data") or {}
+        message = data.get("message") or {}
+        source = message.get("source") or {}
+        usage = data.get("usage") or message.get("usage") or {}
+        if not isinstance(usage, dict):
+            continue
+        stamp = row.get("time")
+        try:
+            timestamp = (datetime.fromtimestamp(int(stamp) / 1000, timezone.utc)
+                         .astimezone(zone).isoformat(timespec="seconds"))
+        except (TypeError, ValueError, OSError):
+            continue
+        input_tokens = number(usage.get("inputTokens"))
+        output_tokens = number(usage.get("outputTokens")) + number(usage.get("reasoningTokens"))
+        cache_read = number(usage.get("cacheReadTokens"))
+        cache_write = number(usage.get("cacheWriteTokens")) if "cacheWriteTokens" in usage else 0
+        total = input_tokens + output_tokens + cache_read + cache_write
+        if total == 0:
+            continue
+        events.append((
+            str(path), "dsh",
+            str(source.get("provider") or "dsh"),
+            str(source.get("model") or "unknown"),
+            timestamp, session_id, 1,
+            input_tokens, output_tokens, cache_read, cache_write, total,
+        ))
+    return events
+
+
 def source_files(config: Config) -> list[tuple[Path, str, dict[str, tuple[str, str, str]]]]:
     result: list[tuple[Path, str, dict[str, tuple[str, str, str]]]] = []
     for path in expand_paths([config.claude_glob]):
@@ -257,6 +339,8 @@ def source_files(config: Config) -> list[tuple[Path, str, dict[str, tuple[str, s
         model_map = codex_state_models(home)
         for path in expand_paths([str(home / "sessions" / "**" / "*.jsonl")]):
             result.append((path, "codex", model_map))
+    for path in expand_paths([config.dsh_glob]):
+        result.append((path, "dsh", {}))
     return result
 
 
@@ -277,6 +361,8 @@ def update_cache(config: Config) -> int:
         connection.execute("DELETE FROM events WHERE path = ?", (key,))
         if source == "claude-code":
             events = parse_claude(path, config.timezone_name)
+        elif source == "dsh":
+            events = parse_dsh(path, config.timezone_name)
         else:
             metadata = model_map.get(key, ("codex", "unknown", ""))
             events = parse_codex(path, config.timezone_name, metadata)
@@ -482,13 +568,21 @@ def read_prompt_calendar(config: Config) -> dict[str, dict[str, int]]:
         for path in expand_paths([pattern]):
             counts = calendars.setdefault(source, Counter())
             try:
-                with path.open(encoding="utf-8", errors="ignore") as handle:
-                    for line in handle:
+                if source == "dsh":
+                    # dsh 没有独立的 history.jsonl，提示历史就在会话文件里：
+                    # `user/message` 事件带毫秒时间戳。只数 kind=user 的条目，
+                    # 插件注入的 runtime 上下文（kind=plugin）不算用户提示。
+                    lines = decompress_zstd(path).splitlines()
+                    for line in lines:
                         try:
                             row = json.loads(line)
                         except json.JSONDecodeError:
                             continue
-                        stamp = row.get("timestamp", row.get("ts"))
+                        if row.get("type") != "user/message":
+                            continue
+                        if (row.get("data") or {}).get("source", {}).get("kind") != "user":
+                            continue
+                        stamp = row.get("time")
                         try:
                             seconds = float(stamp)
                         except (TypeError, ValueError):
@@ -496,7 +590,22 @@ def read_prompt_calendar(config: Config) -> dict[str, dict[str, int]]:
                         if seconds > 1e11:  # 毫秒
                             seconds /= 1000
                         counts[datetime.fromtimestamp(seconds, zone).date().isoformat()] += 1
-            except OSError:
+                else:
+                    with path.open(encoding="utf-8", errors="ignore") as handle:
+                        for line in handle:
+                            try:
+                                row = json.loads(line)
+                            except json.JSONDecodeError:
+                                continue
+                            stamp = row.get("timestamp", row.get("ts"))
+                            try:
+                                seconds = float(stamp)
+                            except (TypeError, ValueError):
+                                continue
+                            if seconds > 1e11:  # 毫秒
+                                seconds /= 1000
+                            counts[datetime.fromtimestamp(seconds, zone).date().isoformat()] += 1
+            except (OSError, RuntimeError):
                 continue
     return {source: dict(counts) for source, counts in calendars.items() if counts}
 
