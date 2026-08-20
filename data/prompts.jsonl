@@ -139,4 +139,5 @@
 {"date": "2026-08-16", "sources": {"claude-code": 18, "codex": 13}}
 {"date": "2026-08-17", "sources": {"claude-code": 95, "codex": 48}}
 {"date": "2026-08-18", "sources": {"claude-code": 21, "codex": 1}}
-{"date": "2026-08-19", "sources": {"claude-code": 12, "codex": 15, "dsh": 72}}
+{"date": "2026-08-19", "sources": {"claude-code": 12, "codex": 15, "dsh": 90}}
+{"date": "2026-08-20", "sources": {"claude-code": 2, "dsh": 11}}
