@@ -1208,21 +1208,40 @@
       "cache_read_tokens": 91673280,
       "cache_write_tokens": 0,
       "total_tokens": 95100290
+    },
+    "2026-08-24": {
+      "date": "2026-08-24",
+      "sources": {
+        "claude-code": 6667258,
+        "codex": 4475063
+      },
+      "models": {
+        "codex-auto-review": 38613,
+        "glm-5.2": 6667258,
+        "gpt-5.6-sol": 4436450
+      },
+      "sessions": 3,
+      "turns": 142,
+      "input_tokens": 4568310,
+      "output_tokens": 89467,
+      "cache_read_tokens": 10400064,
+      "cache_write_tokens": 0,
+      "total_tokens": 11142321
     }
   },
   "summary": {
-    "total_tokens": 9723328900,
-    "input_tokens": 4244962862,
-    "output_tokens": 40038155,
-    "cache_read_tokens": 7558692798,
+    "total_tokens": 9734471221,
+    "input_tokens": 4249531172,
+    "output_tokens": 40127622,
+    "cache_read_tokens": 7569092862,
     "cache_write_tokens": 69099497,
-    "active_days": 65,
-    "sessions": 537,
-    "turns": 55525,
+    "active_days": 66,
+    "sessions": 540,
+    "turns": 55667,
     "top_models": [
       [
         "gpt-5.6-sol",
-        3301231377
+        3305667827
       ],
       [
         "claude-opus-5",
@@ -1230,7 +1249,7 @@
       ],
       [
         "glm-5.2",
-        2251204568
+        2257871826
       ],
       [
         "astron-code-latest",
@@ -1258,7 +1277,7 @@
       ],
       [
         "codex-auto-review",
-        20008182
+        20046795
       ],
       [
         "gpt-5.6-luna",
@@ -1292,11 +1311,11 @@
     "top_providers": [
       [
         "claude-code",
-        4453285372
+        4459952630
       ],
       [
         "openai",
-        3236373313
+        3240848376
       ],
       [
         "deepseek-official",
@@ -1324,12 +1343,12 @@
       ]
     ],
     "sources": {
-      "codex": 3654917538,
-      "claude-code": 5792289399,
+      "codex": 3659392601,
+      "claude-code": 5798956657,
       "dsh": 276121963
     },
     "first_date": "2026-06-12",
-    "last_date": "2026-08-23",
+    "last_date": "2026-08-24",
     "hours": [
       445,
       167,
@@ -1341,8 +1360,8 @@
       78,
       308,
       1304,
-      3626,
-      4752,
+      3687,
+      4833,
       4648,
       2998,
       3924,
@@ -1357,7 +1376,7 @@
       1230
     ],
     "weekdays": [
-      13333,
+      13475,
       7087,
       14520,
       5509,
@@ -1367,17 +1386,17 @@
     ],
     "models_by_source": {
       "codex": {
-        "gpt-5.6-sol": 3301231377,
+        "gpt-5.6-sol": 3305667827,
         "gpt-5.5": 176584150,
         "deepseek-v4-flash": 116716940,
         "gpt-5.6-terra": 23490403,
-        "codex-auto-review": 20008182,
+        "codex-auto-review": 20046795,
         "gpt-5.6-luna": 16865969,
         "deepseek-v4-pro": 20517
       },
       "claude-code": {
         "claude-opus-5": 2647598864,
-        "glm-5.2": 1242054481,
+        "glm-5.2": 1248721739,
         "astron-code-latest": 488923539,
         "glm-5.3": 71778038,
         "claude-opus-4-8": 1772244,
@@ -1541,7 +1560,7 @@
       "2026-08-21": 13,
       "2026-08-22": 1,
       "2026-08-23": 46,
-      "2026-08-24": 2
+      "2026-08-24": 10
     },
     "prompt_calendar_by_source": {
       "claude-code": {
@@ -1685,7 +1704,8 @@
         "2026-08-19": 12,
         "2026-08-20": 18,
         "2026-08-21": 8,
-        "2026-08-23": 10
+        "2026-08-23": 10,
+        "2026-08-24": 4
       },
       "codex": {
         "2026-06-12": 20,
@@ -1743,17 +1763,17 @@
         "2026-08-21": 5,
         "2026-08-22": 1,
         "2026-08-23": 36,
-        "2026-08-24": 2
+        "2026-08-24": 6
       },
       "dsh": {
         "2026-08-19": 90,
         "2026-08-20": 16
       }
     },
-    "prompt_total": 4360,
+    "prompt_total": 4368,
     "prompt_sources": {
-      "claude-code": 3233,
-      "codex": 1021,
+      "claude-code": 3237,
+      "codex": 1025,
       "dsh": 106
     },
     "prompt_first": "2025-09-30",
@@ -1761,7 +1781,7 @@
       {
         "key": "calendar-2025-09",
         "start": "2025-09-30",
-        "end": "2026-08-23"
+        "end": "2026-08-24"
       }
     ]
   }
