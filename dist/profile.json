@@ -1253,36 +1253,57 @@
       "date": "2026-08-26",
       "sources": {
         "claude-code": 8493787,
-        "codex": 3741096
+        "codex": 62394982
       },
       "models": {
-        "codex-auto-review": 172420,
-        "deepseek-v4-flash": 1742480,
+        "codex-auto-review": 1005796,
+        "deepseek-v4-flash": 4581917,
         "glm-5.2": 8493787,
-        "gpt-5.6-sol": 1826196
+        "gpt-5.6-sol": 56807269
       },
-      "sessions": 7,
-      "turns": 159,
-      "input_tokens": 4007708,
-      "output_tokens": 133287,
-      "cache_read_tokens": 11409216,
+      "sessions": 9,
+      "turns": 597,
+      "input_tokens": 62435756,
+      "output_tokens": 359125,
+      "cache_read_tokens": 67683904,
       "cache_write_tokens": 0,
-      "total_tokens": 12234883
+      "total_tokens": 70888769
+    },
+    "2026-08-27": {
+      "date": "2026-08-27",
+      "sources": {
+        "claude-code": 97474,
+        "codex": 28044817
+      },
+      "models": {
+        "codex-auto-review": 381491,
+        "deepseek-v4-flash": 9941940,
+        "glm-5.2": 97474,
+        "gpt-5.6-sol": 16509768,
+        "unknown": 1211618
+      },
+      "sessions": 5,
+      "turns": 276,
+      "input_tokens": 27978934,
+      "output_tokens": 150685,
+      "cache_read_tokens": 27138688,
+      "cache_write_tokens": 0,
+      "total_tokens": 28142291
     }
   },
   "summary": {
-    "total_tokens": 10109680908,
-    "input_tokens": 4506083346,
-    "output_tokens": 41896815,
-    "cache_read_tokens": 7933346174,
+    "total_tokens": 10196477085,
+    "input_tokens": 4592490328,
+    "output_tokens": 42273338,
+    "cache_read_tokens": 8016759550,
     "cache_write_tokens": 69099497,
-    "active_days": 68,
-    "sessions": 568,
-    "turns": 58906,
+    "active_days": 69,
+    "sessions": 575,
+    "turns": 59620,
     "top_models": [
       [
         "gpt-5.6-sol",
-        3541564390
+        3613055231
       ],
       [
         "claude-opus-5",
@@ -1290,7 +1311,7 @@
       ],
       [
         "glm-5.2",
-        2379191134
+        2379288608
       ],
       [
         "astron-code-latest",
@@ -1298,7 +1319,7 @@
       ],
       [
         "deepseek-v4-flash",
-        380718410
+        393499787
       ],
       [
         "gpt-5.5",
@@ -1313,12 +1334,12 @@
         71778038
       ],
       [
-        "gpt-5.6-terra",
-        23490403
+        "codex-auto-review",
+        23865807
       ],
       [
-        "codex-auto-review",
-        22650940
+        "gpt-5.6-terra",
+        23490403
       ],
       [
         "gpt-5.6-luna",
@@ -1337,6 +1358,10 @@
         1772244
       ],
       [
+        "unknown",
+        1211618
+      ],
+      [
         "claude-haiku-4-5-20251001",
         796417
       ],
@@ -1352,11 +1377,11 @@
     "top_providers": [
       [
         "claude-code",
-        4581271938
+        4581369412
       ],
       [
         "openai",
-        3479349084
+        3552054792
       ],
       [
         "deepseek-official",
@@ -1368,7 +1393,7 @@
       ],
       [
         "deepseek",
-        132127128
+        144908505
       ],
       [
         "aoligei",
@@ -1384,12 +1409,12 @@
       ]
     ],
     "sources": {
-      "codex": 3913282980,
-      "claude-code": 5920275965,
+      "codex": 3999981683,
+      "claude-code": 5920373439,
       "dsh": 276121963
     },
     "first_date": "2026-06-12",
-    "last_date": "2026-08-26",
+    "last_date": "2026-08-27",
     "hours": [
       445,
       167,
@@ -1403,41 +1428,42 @@
       1335,
       3687,
       5193,
-      4957,
-      3203,
-      4054,
-      4939,
-      3308,
+      4961,
+      3444,
+      4189,
+      5035,
+      3310,
       4576,
       3424,
-      8532,
-      3804,
-      2932,
-      2477,
+      8542,
+      3884,
+      3042,
+      2513,
       1230
     ],
     "weekdays": [
       15378,
       8264,
-      14679,
-      5509,
+      15117,
+      5785,
       5861,
       4083,
       5132
     ],
     "models_by_source": {
       "codex": {
-        "gpt-5.6-sol": 3541564390,
+        "gpt-5.6-sol": 3613055231,
         "gpt-5.5": 176584150,
-        "deepseek-v4-flash": 132106611,
+        "deepseek-v4-flash": 144887988,
+        "codex-auto-review": 23865807,
         "gpt-5.6-terra": 23490403,
-        "codex-auto-review": 22650940,
         "gpt-5.6-luna": 16865969,
+        "unknown": 1211618,
         "deepseek-v4-pro": 20517
       },
       "claude-code": {
         "claude-opus-5": 2647598864,
-        "glm-5.2": 1370041047,
+        "glm-5.2": 1370138521,
         "astron-code-latest": 488923539,
         "glm-5.3": 71778038,
         "claude-opus-4-8": 1772244,
@@ -1603,7 +1629,8 @@
       "2026-08-23": 46,
       "2026-08-24": 49,
       "2026-08-25": 49,
-      "2026-08-26": 11
+      "2026-08-26": 22,
+      "2026-08-27": 13
     },
     "prompt_calendar_by_source": {
       "claude-code": {
@@ -1750,7 +1777,8 @@
         "2026-08-23": 10,
         "2026-08-24": 21,
         "2026-08-25": 29,
-        "2026-08-26": 5
+        "2026-08-26": 5,
+        "2026-08-27": 1
       },
       "codex": {
         "2026-06-12": 20,
@@ -1810,17 +1838,18 @@
         "2026-08-23": 36,
         "2026-08-24": 28,
         "2026-08-25": 20,
-        "2026-08-26": 6
+        "2026-08-26": 17,
+        "2026-08-27": 12
       },
       "dsh": {
         "2026-08-19": 90,
         "2026-08-20": 16
       }
     },
-    "prompt_total": 4467,
+    "prompt_total": 4491,
     "prompt_sources": {
-      "claude-code": 3288,
-      "codex": 1073,
+      "claude-code": 3289,
+      "codex": 1096,
       "dsh": 106
     },
     "prompt_first": "2025-09-30",
@@ -1828,7 +1857,7 @@
       {
         "key": "calendar-2025-09",
         "start": "2025-09-30",
-        "end": "2026-08-26"
+        "end": "2026-08-27"
       }
     ]
   }
