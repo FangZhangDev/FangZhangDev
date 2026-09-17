@@ -160,4 +160,12 @@
 {"date": "2026-09-06", "sources": {"codex": 45}}
 {"date": "2026-09-07", "sources": {"codex": 22}}
 {"date": "2026-09-08", "sources": {"codex": 62}}
-{"date": "2026-09-09", "sources": {"codex": 33}}
+{"date": "2026-09-09", "sources": {"codex": 36}}
+{"date": "2026-09-10", "sources": {"codex": 12}}
+{"date": "2026-09-11", "sources": {"codex": 6}}
+{"date": "2026-09-12", "sources": {"codex": 13}}
+{"date": "2026-09-13", "sources": {"codex": 8}}
+{"date": "2026-09-14", "sources": {"codex": 46}}
+{"date": "2026-09-15", "sources": {"claude-code": 6, "codex": 52}}
+{"date": "2026-09-16", "sources": {"codex": 12}}
+{"date": "2026-09-17", "sources": {"claude-code": 7, "codex": 2}}
