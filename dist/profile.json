@@ -1760,34 +1760,295 @@
     "2026-09-24": {
       "date": "2026-09-24",
       "sources": {
-        "codex": 7748610
+        "codex": 38216712
       },
       "models": {
-        "codex-auto-review": 24470,
-        "gpt-5.6-sol": 7724140
+        "deepseek-flash": 28507191,
+        "gpt-5.6-sol": 7724140,
+        "gpt-6-astra": 1960911,
+        "unknown": 24470
       },
-      "sessions": 2,
-      "turns": 72,
-      "input_tokens": 7730843,
-      "output_tokens": 17767,
-      "cache_read_tokens": 7574400,
+      "sessions": 5,
+      "turns": 247,
+      "input_tokens": 38079616,
+      "output_tokens": 137096,
+      "cache_read_tokens": 37553920,
       "cache_write_tokens": 0,
-      "total_tokens": 7748610
+      "total_tokens": 38216712
+    },
+    "2026-09-25": {
+      "date": "2026-09-25",
+      "sources": {
+        "codex": 3058274
+      },
+      "models": {
+        "deepseek-flash": 3058274
+      },
+      "sessions": 1,
+      "turns": 42,
+      "input_tokens": 3032067,
+      "output_tokens": 26207,
+      "cache_read_tokens": 2952192,
+      "cache_write_tokens": 0,
+      "total_tokens": 3058274
+    },
+    "2026-09-26": {
+      "date": "2026-09-26",
+      "sources": {
+        "codex": 10448604
+      },
+      "models": {
+        "gpt-6-astra": 10125665,
+        "unknown": 322939
+      },
+      "sessions": 1,
+      "turns": 82,
+      "input_tokens": 10388252,
+      "output_tokens": 60352,
+      "cache_read_tokens": 9677440,
+      "cache_write_tokens": 0,
+      "total_tokens": 10448604
+    },
+    "2026-09-27": {
+      "date": "2026-09-27",
+      "sources": {
+        "codex": 39948102
+      },
+      "models": {
+        "deepseek-flash": 34614463,
+        "gpt-6-astra": 5188677,
+        "unknown": 144962
+      },
+      "sessions": 7,
+      "turns": 356,
+      "input_tokens": 39606744,
+      "output_tokens": 341358,
+      "cache_read_tokens": 38968448,
+      "cache_write_tokens": 0,
+      "total_tokens": 39948102
+    },
+    "2026-09-28": {
+      "date": "2026-09-28",
+      "sources": {
+        "codex": 118200367
+      },
+      "models": {
+        "deepseek-flash": 41671005,
+        "gpt-5.6-sol": 3087417,
+        "gpt-6-sol": 37792,
+        "gpt-6.1-sol": 69007289,
+        "unknown": 4396864
+      },
+      "sessions": 5,
+      "turns": 844,
+      "input_tokens": 117558350,
+      "output_tokens": 642017,
+      "cache_read_tokens": 114412416,
+      "cache_write_tokens": 0,
+      "total_tokens": 118200367
+    },
+    "2026-09-29": {
+      "date": "2026-09-29",
+      "sources": {
+        "codex": 467573
+      },
+      "models": {
+        "gpt-6.1-sol": 467573
+      },
+      "sessions": 1,
+      "turns": 7,
+      "input_tokens": 463837,
+      "output_tokens": 3736,
+      "cache_read_tokens": 414208,
+      "cache_write_tokens": 0,
+      "total_tokens": 467573
+    },
+    "2026-09-30": {
+      "date": "2026-09-30",
+      "sources": {
+        "codex": 20647244
+      },
+      "models": {
+        "deepseek-flash": 106876,
+        "gpt-6.1-sol": 18022841,
+        "unknown": 2517527
+      },
+      "sessions": 3,
+      "turns": 175,
+      "input_tokens": 20578720,
+      "output_tokens": 68524,
+      "cache_read_tokens": 19842432,
+      "cache_write_tokens": 0,
+      "total_tokens": 20647244
+    },
+    "2026-10-02": {
+      "date": "2026-10-02",
+      "sources": {
+        "codex": 5555760
+      },
+      "models": {
+        "gpt-6.1-sol": 5527171,
+        "unknown": 28589
+      },
+      "sessions": 1,
+      "turns": 51,
+      "input_tokens": 5520312,
+      "output_tokens": 35448,
+      "cache_read_tokens": 5191168,
+      "cache_write_tokens": 0,
+      "total_tokens": 5555760
+    },
+    "2026-10-03": {
+      "date": "2026-10-03",
+      "sources": {
+        "codex": 9488978
+      },
+      "models": {
+        "gpt-6.1-sol": 8725929,
+        "unknown": 763049
+      },
+      "sessions": 3,
+      "turns": 96,
+      "input_tokens": 9421110,
+      "output_tokens": 67868,
+      "cache_read_tokens": 9032192,
+      "cache_write_tokens": 0,
+      "total_tokens": 9488978
+    },
+    "2026-10-05": {
+      "date": "2026-10-05",
+      "sources": {
+        "codex": 38237932
+      },
+      "models": {
+        "gpt-6.1-sol": 36515850,
+        "unknown": 1722082
+      },
+      "sessions": 1,
+      "turns": 305,
+      "input_tokens": 37938546,
+      "output_tokens": 299386,
+      "cache_read_tokens": 35638400,
+      "cache_write_tokens": 0,
+      "total_tokens": 38237932
+    },
+    "2026-10-06": {
+      "date": "2026-10-06",
+      "sources": {
+        "codex": 54451744
+      },
+      "models": {
+        "gpt-6.1-sol": 51581522,
+        "unknown": 2870222
+      },
+      "sessions": 1,
+      "turns": 428,
+      "input_tokens": 53958614,
+      "output_tokens": 493130,
+      "cache_read_tokens": 51127552,
+      "cache_write_tokens": 0,
+      "total_tokens": 54451744
+    },
+    "2026-10-07": {
+      "date": "2026-10-07",
+      "sources": {
+        "codex": 2918821
+      },
+      "models": {
+        "gpt-6.1-sol": 2838280,
+        "unknown": 80541
+      },
+      "sessions": 1,
+      "turns": 42,
+      "input_tokens": 2901928,
+      "output_tokens": 16893,
+      "cache_read_tokens": 2747520,
+      "cache_write_tokens": 0,
+      "total_tokens": 2918821
+    },
+    "2026-10-08": {
+      "date": "2026-10-08",
+      "sources": {
+        "codex": 25038383
+      },
+      "models": {
+        "deepseek-flash": 5047014,
+        "gpt-6.1-sol": 19560878,
+        "unknown": 430491
+      },
+      "sessions": 3,
+      "turns": 236,
+      "input_tokens": 24854414,
+      "output_tokens": 183969,
+      "cache_read_tokens": 23954944,
+      "cache_write_tokens": 0,
+      "total_tokens": 25038383
+    },
+    "2026-10-09": {
+      "date": "2026-10-09",
+      "sources": {
+        "codex": 22317074
+      },
+      "models": {
+        "gpt-6.1-sol": 20561708,
+        "unknown": 1755366
+      },
+      "sessions": 4,
+      "turns": 189,
+      "input_tokens": 22177399,
+      "output_tokens": 139675,
+      "cache_read_tokens": 20170752,
+      "cache_write_tokens": 0,
+      "total_tokens": 22317074
+    },
+    "2026-10-10": {
+      "date": "2026-10-10",
+      "sources": {
+        "codex": 54365324
+      },
+      "models": {
+        "gpt-6.1-sol": 53227519,
+        "unknown": 1137805
+      },
+      "sessions": 6,
+      "turns": 488,
+      "input_tokens": 53937487,
+      "output_tokens": 427837,
+      "cache_read_tokens": 51602432,
+      "cache_write_tokens": 0,
+      "total_tokens": 54365324
+    },
+    "2026-10-11": {
+      "date": "2026-10-11",
+      "sources": {
+        "codex": 18251725
+      },
+      "models": {
+        "gpt-6.1-sol": 17726796,
+        "unknown": 524929
+      },
+      "sessions": 8,
+      "turns": 180,
+      "input_tokens": 18133096,
+      "output_tokens": 118629,
+      "cache_read_tokens": 16684672,
+      "cache_write_tokens": 0,
+      "total_tokens": 18251725
     }
   },
   "summary": {
-    "total_tokens": 12000895541,
-    "input_tokens": 6379033591,
-    "output_tokens": 49442483,
-    "cache_read_tokens": 9670817976,
+    "total_tokens": 12454759548,
+    "input_tokens": 6829853240,
+    "output_tokens": 52486841,
+    "cache_read_tokens": 10103214264,
     "cache_write_tokens": 69099497,
-    "active_days": 96,
-    "sessions": 794,
-    "turns": 75304,
+    "active_days": 111,
+    "sessions": 843,
+    "turns": 79000,
     "top_models": [
       [
         "gpt-5.6-sol",
-        4807029466
+        4810116883
       ],
       [
         "claude-opus-5",
@@ -1807,7 +2068,11 @@
       ],
       [
         "deepseek-flash",
-        203292341
+        316297164
+      ],
+      [
+        "gpt-6.1-sol",
+        303763356
       ],
       [
         "gpt-5.5",
@@ -1831,15 +2096,19 @@
       ],
       [
         "gpt-6-astra",
-        48023070
+        65298323
       ],
       [
         "codex-auto-review",
-        34883003
+        34858533
       ],
       [
         "gpt-5.6-terra",
         23490403
+      ],
+      [
+        "unknown",
+        16719836
       ],
       [
         "glm-5.2[1m]",
@@ -1864,12 +2133,16 @@
       [
         "doubao-seed-code",
         78124
+      ],
+      [
+        "gpt-6-sol",
+        37792
       ]
     ],
     "top_providers": [
       [
         "openai",
-        4708804342
+        5032943690
       ],
       [
         "claude-code",
@@ -1877,7 +2150,7 @@
       ],
       [
         "deepseek",
-        448898694
+        561903517
       ],
       [
         "yuanheng",
@@ -1896,62 +2169,65 @@
         21334555
       ],
       [
-        "cchs",
-        13810717
+        "codex",
+        16719836
       ]
     ],
     "sources": {
-      "codex": 5712839021,
+      "codex": 6166703028,
       "claude-code": 6000923356,
       "dsh": 287133164
     },
     "first_date": "2026-06-12",
-    "last_date": "2026-09-24",
+    "last_date": "2026-10-11",
     "hours": [
-      445,
-      167,
-      47,
+      516,
+      226,
+      84,
       46,
       62,
       56,
       46,
       78,
       450,
-      2155,
-      4884,
-      6642,
-      5825,
-      4525,
-      5180,
-      6074,
-      4504,
-      5750,
-      4451,
-      10020,
-      5116,
-      4142,
-      3240,
-      1399
+      2199,
+      5125,
+      6975,
+      5963,
+      4800,
+      5324,
+      6378,
+      4767,
+      6257,
+      4612,
+      10190,
+      5319,
+      4442,
+      3545,
+      1540
     ],
     "weekdays": [
-      17548,
-      10741,
-      16253,
-      7478,
-      10831,
-      5631,
-      6822
+      18697,
+      11176,
+      16470,
+      7889,
+      11113,
+      6297,
+      7358
     ],
     "models_by_source": {
       "codex": {
-        "gpt-5.6-sol": 4807029466,
+        "gpt-5.6-sol": 4810116883,
+        "deepseek-flash": 316297164,
+        "gpt-6.1-sol": 303763356,
         "deepseek-v4-flash": 245585836,
-        "deepseek-flash": 203292341,
         "gpt-5.5": 176584150,
         "gpt-5.6-luna": 173930235,
-        "gpt-6-astra": 48023070,
-        "codex-auto-review": 34883003,
+        "gpt-6-astra": 65298323,
+        "codex-auto-review": 34858533,
         "gpt-5.6-terra": 23490403,
+        "unknown": 16719836,
+        "gpt-6-sol": 37792,
         "deepseek-v4-pro": 20517
       },
       "claude-code": {
@@ -2152,7 +2428,22 @@
       "2026-09-21": 16,
       "2026-09-22": 14,
       "2026-09-23": 3,
-      "2026-09-24": 1
+      "2026-09-24": 11,
+      "2026-09-25": 7,
+      "2026-09-26": 4,
+      "2026-09-27": 32,
+      "2026-09-28": 15,
+      "2026-09-29": 3,
+      "2026-09-30": 11,
+      "2026-10-02": 3,
+      "2026-10-03": 7,
+      "2026-10-05": 6,
+      "2026-10-06": 3,
+      "2026-10-07": 3,
+      "2026-10-08": 22,
+      "2026-10-09": 13,
+      "2026-10-10": 78,
+      "2026-10-11": 39
     },
     "prompt_calendar_by_source": {
       "claude-code": {
@@ -2394,7 +2685,22 @@
         "2026-09-21": 16,
         "2026-09-22": 14,
         "2026-09-23": 3,
-        "2026-09-24": 1
+        "2026-09-24": 11,
+        "2026-09-25": 7,
+        "2026-09-26": 4,
+        "2026-09-27": 32,
+        "2026-09-28": 15,
+        "2026-09-29": 3,
+        "2026-09-30": 11,
+        "2026-10-02": 3,
+        "2026-10-03": 7,
+        "2026-10-05": 6,
+        "2026-10-06": 3,
+        "2026-10-07": 3,
+        "2026-10-08": 22,
+        "2026-10-09": 13,
+        "2026-10-10": 78,
+        "2026-10-11": 39
       },
       "dsh": {
         "2026-08-19": 90,
@@ -2403,10 +2709,10 @@
         "2026-08-28": 9
       }
     },
-    "prompt_total": 5424,
+    "prompt_total": 5680,
     "prompt_sources": {
       "claude-code": 3323,
-      "codex": 1978,
+      "codex": 2234,
       "dsh": 123
     },
     "prompt_first": "2025-09-30",
@@ -2414,7 +2720,12 @@
       {
         "key": "calendar-2025-09",
         "start": "2025-09-30",
-        "end": "2026-09-24"
+        "end": "2026-09-29"
+      },
+      {
+        "key": "calendar-2026-09",
+        "start": "2026-09-30",
+        "end": "2026-10-11"
       }
     ]
   }
